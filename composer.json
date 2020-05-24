@@ -2,7 +2,7 @@
 	"name": "luan-ribeiro-dev/backend-generator",
 	"type": "library",
 	"description": "Custom backend framework generator manager",
-	"version": "0.0.1",
+	"version": "0.0.1-dev",
 	"authors": [
 		{
 			"name": "Luan Ribeiro da SIlva",
