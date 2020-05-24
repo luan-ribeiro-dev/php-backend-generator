@@ -3,6 +3,7 @@
 	"type": "library",
 	"description": "Custom backend framework generator manager",
 	"version": "0.0.1-dev",
+	"minimum-stability": "dev",
 	"authors": [
 		{
 			"name": "Luan Ribeiro da SIlva",
