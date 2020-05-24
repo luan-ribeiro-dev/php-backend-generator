@@ -1,6 +1,18 @@
 {
-    "name": "luan-ribeiro-dev/backend-generator",
-    "description": "Custom backend framework generator manager",
+	"name": "luan-ribeiro-dev/backend-generator",
+	"type": "library",
+	"description": "Custom backend framework generator manager",
+	"version": "0.0.1",
+	"authors": [
+		{
+			"name": "Luan Ribeiro da SIlva",
+			"email": "luan.ribeiro.dev@gmail.com",
+			"homepage": "https://www.workana.com/freelancer/f5de39590e5e911111b24fd3c19b623c",
+			"role": "Developer"
+		}
+	],
+
     "require": {
-    }
+		"symfony/console": "^5.0"
+	}
 }
