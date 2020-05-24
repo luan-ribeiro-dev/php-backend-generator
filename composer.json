@@ -2,7 +2,7 @@
 	"name": "luan-ribeiro-dev/backend-generator",
 	"type": "library",
 	"description": "Custom backend framework generator manager",
-	"version": "0.0.1-dev",
+	"version": "1.0.0",
 	"minimum-stability": "dev",
 	"authors": [
 		{
