@@ -1,6 +1,6 @@
 {
 	"name": "luan-ribeiro-dev/backend-generator",
-	"type": "project",
+	"type": "php-framework",
 	"description": "Custom backend framework generator manager",
 	"version": "1.0.0",
 	"authors": [
