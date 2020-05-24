@@ -1,6 +1,6 @@
 #!/usr/bin/env php
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once '../vendor/autoload.php';
 
 use Console\App\Commands\HelloworldCommand;
 use Symfony\Component\Console\Application;
