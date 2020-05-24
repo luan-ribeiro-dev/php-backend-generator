@@ -1,0 +1,6 @@
+{
+    "name": "luan-ribeiro-dev/backend-generator",
+    "description": "Custom backend framework generator manager",
+    "require": {
+    }
+}
