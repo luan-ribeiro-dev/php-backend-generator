@@ -16,7 +16,7 @@ class GenerateAllBackend extends Command
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		Controller::generateAll();
+		Controle::generateAll();
 		return 1;
 	}
 
