@@ -19,6 +19,4 @@ class GenerateAllBackend extends Command
 		Controle::generateAll();
 		return 1;
 	}
-
-	private function
 }

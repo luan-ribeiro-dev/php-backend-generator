@@ -1,16 +1,29 @@
 <?php
-class Controle{
-	public static function checkMainDir(){
-		if (!is_dir(APPLICATION_DIR)) mkdir(APPLICATION_DIR, 0777, true);
+class Controle
+{
+	public static function checkMainDir()
+	{
+		if (!is_dir(APPLICATION)) mkdir(APPLICATION, 0777, true);
+		if (!is_dir(APPLICATION_MODELS)) mkdir(APPLICATION_MODELS, 0777, true);
 	}
 
-	public static function checkBackendDirs(){
-		if (!is_dir(BACKEND_MODEL)) mkdir(APPLICATION_DIR, 0777, true);
-		if (!is_dir(BACKEND_CONTROLE)) mkdir(APPLICATION_DIR, 0777, true);
-		if (!is_dir(BACKEND_DAO)) mkdir(APPLICATION_DIR, 0777, true);
+	public static function checkBackendDirs()
+	{
+		if (!is_dir(BACKEND_MODEL)) mkdir(BACKEND_MODEL, 0777, true);
+		if (!is_dir(BACKEND_CONTROLE)) mkdir(BACKEND_CONTROLE, 0777, true);
+		if (!is_dir(BACKEND_DAO)) mkdir(BACKEND_DAO, 0777, true);
 	}
 
-	public static function generateAll(){
+	public static function generateAll()
+	{
 		Controle::checkMainDir();
+		Controle::checkBackendDirs();
+		
+		Controle::copyApplicationModelJsonExample();
+	}
+
+	public static function copyApplicationModelJsonExample()
+	{
+		copy("../examples/generator_model.json", APPLICATION_MODELS . "/example.json");
 	}
 }

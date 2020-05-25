@@ -26,6 +26,5 @@ define("BACKEND_MODEL", BACKEND . "/modelo");
 define("BACKEND_CONTROLE", BACKEND . "/controle");
 define("BACKEND_DAO", BACKEND . "/dao");
 
-define("APPLICATION_DIR", BACKEND . "/app/generator");
-define("GENERATOR_DATABASE_MODELS_DIR", APPLICATION_DIR . "/models");
-
+define("APPLICATION", BACKEND . "/app/generator");
+define("APPLICATION_MODELS", APPLICATION_DIR . "/models");
