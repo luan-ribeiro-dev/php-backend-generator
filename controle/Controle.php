@@ -19,11 +19,23 @@ class Controle
 		Controle::checkMainDir();
 		Controle::checkBackendDirs();
 		
+		// Controle::copyBin();
 		Controle::copyApplicationModelJsonExample();
+		Controle::generateModels();
+	}
+
+	public static function copyBin()
+	{
+		copy("../examples/generator_model.json", APPLICATION_MODELS . "/example.json");
 	}
 
 	public static function copyApplicationModelJsonExample()
 	{
-		copy("../examples/generator_model.json", APPLICATION_MODELS . "/example.json");
+		copy(ROOT."/examples/generator_model.json", APPLICATION_MODELS . "/example.json");
+	}
+
+	public static function generateModels()
+	{
+		ControleModelo::generate();
 	}
 }
