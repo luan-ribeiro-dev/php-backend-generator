@@ -25,6 +25,7 @@ class ControleModelo
 		ControleModelo::checkAtributos($json_object, $class);
 		ControleModelo::getAtributos($json_object, $class);
 		ControleModelo::getConstrutor($json_object, $class);
+		ControleModelo::getConstrutor($json_object, $class);
 
 		$class .= "\n}";
 		echo $class;
