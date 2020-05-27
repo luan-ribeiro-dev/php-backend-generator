@@ -1,7 +1,18 @@
 {
-	"nome": "Ficha",
-	"nome_tabela": "tbficha",
-	"atributos":[
-		
+	"nome": "Object_Name",
+	"nome_tabela": "table_name",
+	"fake_delete": 0,
+	"atributos": [
+		{"nome":"id", "tipo":"int"},
+		{"nome":"nome", "tipo":"string"},
+		{"nome":"id_object", "tipo":"int", "link":{
+			"nome":"Object", "tipo":"objeto"
+		}},
+		{"nome":"objects", "tipo":"Object[]", "link":{
+			"nome":"Object", "tipo":"lista", "tabela_associativa": "table1_assoc_table2"
+		}}
+	],
+	"validacoes":[
+		{"nome": ["not null"]}
 	]
 }
