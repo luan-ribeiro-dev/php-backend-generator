@@ -6,5 +6,24 @@ require_once("app.php");
 use Symfony\Component\Console\Application;
 
 $app = new Application();
+
 $app->add(new GenerateAllBackend());
+$app->add(new GenerateObjectClasses());
+$app->add(new GenerateModel());
+$app->add(new GenerateControl());
+$app->add(new GenerateSQL());
+
+$app->add(new GenerateModels());
+$app->add(new GenerateControls());
+
+$app->add(new GenerateAppDefault());
+
+$app->add(new GenerateControllerDefaultClasses());
+$app->add(new GenerateDaoDefaultClasses());
+$app->add(new GenerateExceptionDefaultClasses());
+
+$app->add(new GenerateExampleModel());
+
+$app->add(new GenerateConfig());
+
 $app->run();

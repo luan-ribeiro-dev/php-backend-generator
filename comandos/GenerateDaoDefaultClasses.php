@@ -5,18 +5,17 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 
-class GenerateAllBackend extends Command
+class GenerateDaoDefaultClasses extends Command
 {
 	protected function configure()
 	{
-		$this->setName('generate:all')
-			->setDescription('Gera todos os arquivos do backend do sistema')
-			->setHelp('Demonstration of custom commands created by Symfony Console component.');
+		$this->setName('generate:default:dao')
+			->setDescription('Gera o arquivo padrão de ConectaBanco e QueryBuilder em app/dao');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		Comandos::generateAll();
+		Comandos::generateDaoDefaultClasses();
 		return 1;
 	}
 }

@@ -11,12 +11,6 @@
 			"role": "Developer"
 		}
 	],
-	"autoload": {
-		"psr-4": {
-			"Console\\": "src"
-		},
-		"classmap": ["src"]
-	},
     "require": {
 		"symfony/console": "^5.0"
 	}

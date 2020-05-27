@@ -5,18 +5,17 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 
-class GenerateAllBackend extends Command
+class GenerateAppDefault extends Command
 {
 	protected function configure()
 	{
-		$this->setName('generate:all')
-			->setDescription('Gera todos os arquivos do backend do sistema')
-			->setHelp('Demonstration of custom commands created by Symfony Console component.');
+		$this->setName('generate:default:app')
+			->setDescription('Gera o arquivo padrão app.php na raiz');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		Comandos::generateAll();
+		Comandos::generateAppDefault();
 		return 1;
 	}
 }

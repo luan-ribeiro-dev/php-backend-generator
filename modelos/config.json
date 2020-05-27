@@ -1,0 +1,10 @@
+{
+	"project_name":"my_project",
+	"version":"1.0.0",
+	"database":{
+		"nome": "nome_do_banco_de_dados",
+		"caminho": "localhost",
+		"login": "root",
+		"senha": ""
+	}
+}

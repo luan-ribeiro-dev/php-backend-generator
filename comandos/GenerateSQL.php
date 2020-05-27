@@ -5,18 +5,17 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 
-class GenerateAllBackend extends Command
+class GenerateSQL extends Command
 {
 	protected function configure()
 	{
-		$this->setName('generate:all')
-			->setDescription('Gera todos os arquivos do backend do sistema')
-			->setHelp('Demonstration of custom commands created by Symfony Console component.');
+		$this->setName('generate:sql')
+			->setDescription('Um arquivo sql de acordo com o modelo');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		Comandos::generateAll();
+		Comandos::generateSQL();
 		return 1;
 	}
 }

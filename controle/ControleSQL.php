@@ -1,6 +1,6 @@
 <?php
 
-class ControleModelo
+class ControleSQL
 {
 	public static function generate($override = false)
 	{

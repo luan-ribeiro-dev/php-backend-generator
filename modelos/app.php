@@ -1,7 +1,6 @@
 <?php
-require_once 'vendor/autoload.php';
 spl_autoload_register(function ($className) {
-	$directoryNames = ['comandos', 'controle'];
+	$directoryNames = ['app/modelo', 'app/controle', 'app/dao'];
 	$includedClass = false;
 
 	foreach ($directoryNames as $directoryName) {
@@ -19,14 +18,8 @@ spl_autoload_register(function ($className) {
 	}
 });
 
-define("ROOT_PROJECT", dirname(__DIR__));
-define("ROOT", __DIR__);
-define("ROOT_MODELS", ROOT."/modelos");
+define('SALT_BEFORE', '');
+define('SALT', '');
+define('SALT_AFTER', '');
 
-define("APP", ROOT_PROJECT . "/app");
-define("APP_MODEL", APP . "/modelo");
-define("APP_CONTROLE", APP . "/controle");
-define("APP_DAO", APP . "/dao");
-
-define("APPLICATION", APP . "/app/generator");
-define("APPLICATION_MODELS", APPLICATION . "/models");
+define('VERSION', '');
