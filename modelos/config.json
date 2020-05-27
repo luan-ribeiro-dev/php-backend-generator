@@ -6,5 +6,8 @@
 		"caminho": "localhost",
 		"login": "root",
 		"senha": ""
-	}
+	},
+	"salt_before": "",
+	"salt": "",
+	"salt_after": ""
 }

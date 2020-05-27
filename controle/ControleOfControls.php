@@ -81,7 +81,7 @@ class ControleOfControls
 		$class .= "	 * @return true Se for validado\n";
 		$class .= "	 * @throws ValidationException Caso tenha algum erro de validação\n";
 		$class .= "	 */\n";
-		$class .= "	public static function validate(".$json_object['nome']." \$".$lowerName.")\n";
+		$class .= "	public static function validate(".Controle::getCapitalizedName($json_object['nome'])." \$".$lowerName.")\n";
 		$class .= "	{\n";
 		$class .= "		\$errors = [];\n\n";
 		foreach(array_filter($json_object['atributos'], function($atributo){
@@ -109,7 +109,7 @@ class ControleOfControls
 		$class .= "	 * @return true Se for validado\n";
 		$class .= "	 * @throws ValidationException Caso tenha algum erro de validação\n";
 		$class .= "	 */\n";
-		$class .= "	public static function validateDelete(".$json_object['nome']." \$".$lowerName.")\n";
+		$class .= "	public static function validateDelete(".Controle::getCapitalizedName($json_object['nome'])." \$".$lowerName.")\n";
 		$class .= "	{\n";
 		$class .= "		return true;\n";
 		$class .= "	}\n\n";
@@ -131,9 +131,9 @@ class ControleOfControls
 		$class .= "	 * @return bool Se for validado e cadastrado\n";
 		$class .= "	 * @throws Exception Validação ou erro com o banco de dados\n";
 		$class .= "	 */\n";
-		$class .= "	public static function create(".$json_object['nome']." \$".$lowerName.")\n";
+		$class .= "	public static function create(".Controle::getCapitalizedName($json_object['nome'])." \$".$lowerName.")\n";
 		$class .= "	{\n";
-		$class .= "		if (Controle".$json_object['nome']."::validate(\$".$lowerName.")) {\n";
+		$class .= "		if (Controle".Controle::getCapitalizedName($json_object['nome'])."::validate(\$".$lowerName.")) {\n";
 		$class .= "			return \$".$lowerName."->create();\n";
 		$class .= "		} else {\n";
 		$class .= "			return false;\n";
@@ -148,13 +148,13 @@ class ControleOfControls
 		$class .= "	 * @return bool Se for validado e editado\n";
 		$class .= "	 * @throws Exception Validacao ou erro com o banco de dados\n";
 		$class .= "	 */\n";
-		$class .= "	public static function update(".$json_object['nome']." \$".$lowerName.")\n";
+		$class .= "	public static function update(".Controle::getCapitalizedName($json_object['nome'])." \$".$lowerName.")\n";
 		$class .= "	{\n";
-		$class .= "		if (Controle".$json_object['nome']."::validate(\$".$lowerName.")) {\n";
-		$class .= "			\$old".$json_object['nome']." = ".$json_object['nome']."::find(\$".$lowerName."->getId());\n";
+		$class .= "		if (Controle".Controle::getCapitalizedName($json_object['nome'])."::validate(\$".$lowerName.")) {\n";
+		$class .= "			\$old".Controle::getCapitalizedName($json_object['nome'])." = ".Controle::getCapitalizedName($json_object['nome'])."::find(\$".$lowerName."->getId());\n";
 		$class .= "			if (\n				";
 		foreach($json_object['atributos'] as $atributo){
-			$class .= "\$old".$json_object['nome']."->get".Controle::getCapitalizedName($atributo['nome'])."() === \$".$lowerName."->get".Controle::getCapitalizedName($atributo['nome'])."()\n				&& ";
+			$class .= "\$old".Controle::getCapitalizedName($json_object['nome'])."->get".Controle::getCapitalizedName($atributo['nome'])."() === \$".$lowerName."->get".Controle::getCapitalizedName($atributo['nome'])."()\n				&& ";
 		}
 		$class = substr($class, 0, strlen($class)-7);
 		$class .= "			) {\n";
@@ -175,9 +175,9 @@ class ControleOfControls
 		$class .= "	 * @return bool Se for validado e deletado\n";
 		$class .= "	 * @throws Exception Validacao ou erro com o banco de dados\n";
 		$class .= "	 */\n";
-		$class .= "	public static function delete(".$json_object['nome']." \$".$lowerName.")\n";
+		$class .= "	public static function delete(".Controle::getCapitalizedName($json_object['nome'])." \$".$lowerName.")\n";
 		$class .= "	{\n";
-		$class .= "		if (Controle".$json_object['nome']."::validateDelete(\$".$lowerName.")) {\n";
+		$class .= "		if (Controle".Controle::getCapitalizedName($json_object['nome'])."::validateDelete(\$".$lowerName.")) {\n";
 		$class .= "			return \$".$lowerName."->del();\n";
 		$class .= "		} else {\n";
 		$class .= "			return false;\n";

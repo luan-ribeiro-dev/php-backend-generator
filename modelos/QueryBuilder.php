@@ -233,7 +233,7 @@ abstract class QueryBuilder
 	/**
 	 * @return array
 	 */
-	public function get(int $page = null)
+	public function getObjects(int $page = null)
 	{
 		$query = "select " . $this->getColumnsString()
 			. " from " . $this->table . " "

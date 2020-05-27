@@ -71,6 +71,9 @@ class Controle
 
 		$app = file_get_contents(ROOT_MODELS."/app.php");
 		$app = str_replace("define('VERSION', '')", "define('VERSION', '".$config['version']."')", $app);
+		$app = str_replace("define('SALT_BEFORE', '')", "define('SALT_BEFORE', '".$config['salt_before']."')", $app);
+		$app = str_replace("define('SALT', '')", "define('SALT', '".$config['salt']."')", $app);
+		$app = str_replace("define('SALT_AFTER', '')", "define('SALT_AFTER', '".$config['salt_after']."')", $app);
 
 		$arquivo = fopen(ROOT_PROJECT . "/app.php", "w");
 		fwrite($arquivo, $app);
