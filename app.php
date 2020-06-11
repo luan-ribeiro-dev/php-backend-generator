@@ -28,5 +28,7 @@ define("APP_MODEL", APP . "/modelo");
 define("APP_CONTROLE", APP . "/controle");
 define("APP_DAO", APP . "/dao");
 
-define("APPLICATION", APP . "/app/generator");
+define("APPLICATION", APP . "/generator");
 define("APPLICATION_MODELS", APPLICATION . "/models");
+
+session_start();
