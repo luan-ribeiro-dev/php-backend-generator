@@ -61,7 +61,7 @@ class Controle
 
 	public static function copyControllerDefaultClasses()
 	{
-		copy(ROOT . "/modelos/Controle.php", APP_CONTROLE . "/Controle.php");
+		copy(ROOT . "/modelos/Geral.php", APP_CONTROLE . "/Geral.php");
 		copy(ROOT . "/modelos/Constantes.php", APP_CONTROLE . "/Constantes.php");
 	}
 
