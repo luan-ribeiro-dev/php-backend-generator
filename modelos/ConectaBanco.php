@@ -13,22 +13,22 @@ class ConectaBanco
 	 * Nome do banco de dados
 	 * @var string
 	 */
-	private $nomeBanco = "";
+	private $nomeBanco = DATABASE_NAME;
 	/**
 	 * Caminho do banco de dados
 	 * @var string
 	 */
-	private $caminho = "";
+	private $caminho = HOST;
 	/**
 	 * login do banco de dados
 	 * @var string
 	 */
-	private $login = "";
+	private $login = LOGIN;
 	/**
 	 * Senha do banco de dados
 	 * @var string
 	 */
-	private $senha = "";
+	private $senha = PASSWORD;
 	/**
 	 * Nome do banco de dados
 	 * @var string

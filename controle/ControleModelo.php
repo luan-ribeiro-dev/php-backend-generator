@@ -273,10 +273,11 @@ class ControleModelo
 					$class .= "				\$this->set" . Controle::getCapitalizedName($atributo['link']['nome']) . "(" . Controle::getCapitalizedName($atributo['link']['nome']) . "::find(\$this->get" . Controle::getCapitalizedName($atributo['nome']) . "()));\n";
 					$class .= "			}\n";
 				} else if ($atributo['link']['tipo'] == "lista") {
+          // echo var_dump(array_map(function ($element){return $element['nome'];}, ControleModelo::getJsonModels()));
 					$object = array_filter(ControleModelo::getJsonModels(), function ($object) use ($atributo) {
 						return $object['nome'] == $atributo['link']['nome'];
 					});
-					if (count($object) == 0) throw new Exception("arquivo do modelo " . $atributo['link']['tipo'] . " Não foi encontrado");
+					if (count($object) == 0) throw new Exception("arquivo " . $atributo['link']['nome'] . " do modelo " . $atributo['link']['tipo'] . " Não foi encontrado");
 					else $object = array_values($object)[0];
 					$class .= "\n			$" . $atributo['nome'] . " = " . Controle::getCapitalizedName($atributo['link']['nome']) . "::select()\n";
 					$class .= "				->innerJoin('" . $atributo['link']['tabela_associativa'] . "', '" . $atributo['link']['tabela_associativa'] . ".id_" . strtolower($atributo['link']['nome']) . " = " . $object['nome_tabela'] . ".id')\n";
@@ -449,7 +450,7 @@ class ControleModelo
 				$class .= "\n		try {\n";
 				$class .= "			if (isset(\$post_data['" . $atributo['nome'] . "'])){\n";
 				$class .= "				if(strpos(\$post_data['" . $atributo['nome'] . "'], \",\") !== false)\n";
-				$class .= "					\$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(Controle::formatarValorFloat(\$post_data['" . $atributo['nome'] . "']));\n";
+				$class .= "					\$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(\Controle\Geral::formatarValorFloat(\$post_data['" . $atributo['nome'] . "']));\n";
 				$class .= "				else\n";
 				$class .= "					\$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(floatval(\$post_data['" . $atributo['nome'] . "']));\n";
 				$class .= "			}\n";

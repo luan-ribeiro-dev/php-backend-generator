@@ -1,6 +1,7 @@
 {
 	"nome": "Object_Name",
 	"nome_tabela": "table_name",
+	"ordem_tabela": 0,
 	"fake_delete": 0,
 	"replace": false,
 	"atributos": [
