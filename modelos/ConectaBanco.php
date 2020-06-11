@@ -1,5 +1,12 @@
 <?php
 
+namespace DAO;
+
+use Exception;
+use PDO;
+use PDOException;
+use Throwable;
+
 class ConectaBanco
 {
 	/**
