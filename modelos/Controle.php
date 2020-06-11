@@ -105,7 +105,7 @@ class Controle
 
 	public static function formatarDataBRL(DateTime $data)
 	{
-		return $data->format('d/m/Y H:i:s');
+		return $data->format('d/m/Y');
 	}
 
 	public static function existWordInURL(string $word)

@@ -2,6 +2,7 @@
 	"nome": "Object_Name",
 	"nome_tabela": "table_name",
 	"fake_delete": 0,
+	"replace": false,
 	"atributos": [
 		{"nome":"id", "tipo":"int"},
 		{"nome":"nome", "tipo":"string"},

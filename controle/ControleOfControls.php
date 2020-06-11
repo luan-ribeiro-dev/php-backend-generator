@@ -44,7 +44,7 @@ class ControleOfControls
 
 		$class .= "\n}";
 		$arquivo = APP_CONTROLE . "/Controle" . Controle::getCapitalizedName($json_object['nome']) . ".php";
-		if(!is_file($arquivo) || $override == true){
+		if (!is_file($arquivo) || ($override * $json_object['replace'])) {
 			$file = fopen($arquivo, 'w') or die('Cannot open file:  ' . $arquivo);
 			fwrite($file, $class);
 		}

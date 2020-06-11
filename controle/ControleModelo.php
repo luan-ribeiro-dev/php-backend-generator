@@ -57,7 +57,7 @@ class ControleModelo
 		$class .= "\n}";
 		$arquivo = APP_MODEL . "/" . Controle::getCapitalizedName($json_object['nome']) . ".php";
 
-		if (!is_file($arquivo) || $override == true) {
+		if (!is_file($arquivo) || ($override * $json_object['replace'])) {
 			$file = fopen($arquivo, 'w') or die('Cannot open file:  ' . $arquivo);
 			fwrite($file, $class);
 		}
@@ -112,7 +112,7 @@ class ControleModelo
 			if (isset($atributo['link'])) return $atributo['link']['tipo'] != "lista";
 			else return true;
 		}) as $atributo) {
-			$class .= $atributo['tipo'] . " ";
+			$class .= "?".$atributo['tipo'] . " ";
 			$class .= "$" . $atributo['nome'] . " = ";
 			if (isset($atributo['default']))
 				$class .= $atributo['default'];
@@ -228,14 +228,14 @@ class ControleModelo
 		$class .= "					\$" . $lowerName . "s[] = \$" . $lowerName . ";\n";
 		$class .= "				} else {\n";
 		$class .= "					foreach (\$object as &\$value) {\n";
-		$class .= "						if (DateTime::createFromFormat('Y-m-d H:i:s', \$value) !== FALSE) {\n";
+		$class .= "						if (DateTime::createFromFormat('Y-m-d H:m:s', \$value) !== FALSE) {\n";
 		$class .= "							\$date = new DateTime(\$value);\n";
 		$class .= "							\$value = \$date->format('Y-m-d');\n";
 		$class .= "						}\n";
 		$class .= "					}\n";
 		$class .= "					unset(\$value);\n\n";
-		$class .= "					if (\$single) return \$object;\n";
-		$class .= "					if(\$appendChilds) " . Controle::getCapitalizedName($json_object['nome']) . "::attachChildsJson(\$object);\n\n";
+		$class .= "					if(\$appendChilds) " . Controle::getCapitalizedName($json_object['nome']) . "::attachChildsJson(\$object);\n";
+		$class .= "					if (\$single) return \$object;\n\n";
 		$class .= "					\$" . $lowerName . "s[] = \$object;\n";
 		$class .= "				}\n";
 		$class .= "			}\n\n";
@@ -499,10 +499,11 @@ class ControleModelo
 		$class .= "		\$json = [\n";
 		foreach ($json_object['atributos'] as $atributo) {
 			if ($atributo['tipo'] == 'DateTime') {
-				$class .= "			\"" . $atributo['nome'] . "\" => (\$" . $lowerName . "->get" . Controle::getCapitalizedName($atributo['nome']) . "() != null) ? \$" . $lowerName . "->get" . Controle::getCapitalizedName($atributo['nome']) . "()->format('Y-m-d H:i:s') : null,\n";
+				$class .= "			\"" . $atributo['nome'] . "\" => (\$" . $lowerName . "->get" . Controle::getCapitalizedName($atributo['nome']) . "() != null) ? \$" . $lowerName . "->get" . Controle::getCapitalizedName($atributo['nome']) . "()->format('Y-m-d') : null,\n";
 			} else if (isset($atributo['link']) && $atributo['link']['tipo'] == "lista") {
 				$class .= "			\"" . $atributo['nome'] . "\" => \$" . $atributo['nome'] . ",\n";
 			} else if (isset($atributo['link']) && $atributo['link']['tipo'] == "objeto") {
+				$class .= "			\"" . $atributo['nome'] . "\" => \$" . $lowerName . "->get" . Controle::getCapitalizedName($atributo['nome']) . "(),\n";
 				$class .= "			\"" . strtolower($atributo['link']['nome']) . "\" => \$" . strtolower($atributo['link']['nome']) . ",\n";
 			} else {
 				$class .= "			\"" . $atributo['nome'] . "\" => \$" . $lowerName . "->get" . Controle::getCapitalizedName($atributo['nome']) . "(),\n";
@@ -534,7 +535,7 @@ class ControleModelo
 		$class .= "	{\n";
 		foreach ($json_object['atributos'] as $atributo) {
 			$class .= "		if (\$this->get" . Controle::getCapitalizedName($atributo['nome']) . "() != null) {\n";
-			if ($atributo['tipo'] == "DateTime") $class .= "			\$this->set" . Controle::getCapitalizedName($atributo['nome']) . "(new DateTime(Controle::sanitize(\$this->get" . Controle::getCapitalizedName($atributo['nome']) . "()->format('Y-m-d H:i:s'))));\n";
+			if ($atributo['tipo'] == "DateTime") $class .= "			\$this->set" . Controle::getCapitalizedName($atributo['nome']) . "(new DateTime(Controle::sanitize(\$this->get" . Controle::getCapitalizedName($atributo['nome']) . "()->format('Y-m-d'))));\n";
 			else if ($atributo['tipo'] == "int") $class .= "			\$this->set" . Controle::getCapitalizedName($atributo['nome']) . "(intval(Controle::sanitize(\$this->get" . Controle::getCapitalizedName($atributo['nome']) . "())));\n";
 			else if (isset($atributo['link']) && $atributo['link']['tipo'] == "lista") $class .= "			foreach(\$this->get" . Controle::getCapitalizedName($atributo['nome']) . "() as \$object) \$object->sanitize();\n";
 			else $class .= "			\$this->set" . Controle::getCapitalizedName($atributo['nome']) . "(Controle::sanitize(\$this->get" . Controle::getCapitalizedName($atributo['nome']) . "()));\n";
@@ -563,9 +564,10 @@ class ControleModelo
 		$class .= "	{\n";
 		$class .= "		return [\n";
 		foreach (array_filter($json_object['atributos'], function ($atributo) {
-			return $atributo['nome'] != "deletado";
+			return (($atributo['nome'] != "deletado") && ((isset($atributo['link']) && $atributo['link']['tipo'] != "lista") || !isset($atributo['link'])));
+			
 		}) as $atributo) {
-			if ($atributo['tipo'] == "DateTime") $class .= "			(\$this->get" . Controle::getCapitalizedName($atributo['nome']) . "() != null) ? \$this->get" . Controle::getCapitalizedName($atributo['nome']) . "()->format('Y-m-d H:i:s') : null,\n";
+			if ($atributo['tipo'] == "DateTime") $class .= "			(\$this->get" . Controle::getCapitalizedName($atributo['nome']) . "() != null) ? \$this->get" . Controle::getCapitalizedName($atributo['nome']) . "()->format('Y-m-d') : null,\n";
 			else $class .= "			\$this->get" . Controle::getCapitalizedName($atributo['nome']) . "(),\n";
 		}
 		$class = substr($class, 0, strlen($class) - 2) . "\n";
