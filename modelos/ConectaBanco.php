@@ -87,6 +87,7 @@ class ConectaBanco
 	 *
 	 * @param string $query
 	 * @param array $args
+   * @return bool|array
 	 * @throws Throwable se houver alguma exceção ao executar a consulta
 	 */
 	public function executeQuery(string $query, $args = null)

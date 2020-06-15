@@ -49,7 +49,7 @@ class ControleOfControls
 
     $class .= "\n}";
     $arquivo = APP_CONTROLE . "/" . Controle::getCapitalizedName($json_object['nome']) . ".php";
-    if (!is_file($arquivo) || ($override * $json_object['replace'])) {
+    if (!is_file($arquivo) || ($override + $json_object['replace'])) {
       $file = fopen($arquivo, 'w') or die('Cannot open file:  ' . $arquivo);
       fwrite($file, $class);
     }
@@ -89,14 +89,27 @@ class ControleOfControls
     $class .= "	public static function validate(\\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . " \$" . $lowerName . ")\n";
     $class .= "	{\n";
     $class .= "		\$errors = [];\n\n";
-    foreach (array_filter($json_object['atributos'], function ($atributo) {
-      return isset($atributo['validacoes'][$atributo['nome']]);
-    }) as $atributo) {
-      $validation = $atributo['validacoes'][$atributo['nome']];
-      if (in_array("not null", $validation)) {
-        $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($atributo['nome']) . "() == null || \$" . $lowerName . "->get" . Controle::getCapitalizedName($atributo['nome']) . "() == \"\") {\n";
-        $class .= "			\$errors['validation']['" . $atributo['nome'] . "'][] = \"O " . Controle::getSeparateName($atributo['nome']) . " é nulo\";\n";
-        $class .= "		}\n\n";
+    foreach (array_map(function ($json) {
+      return $json['nome'];
+    }, $json_object['atributos']) as $key) {
+      
+      if (in_array($key, array_keys($json_object['validacoes']))) {
+        $validation = $json_object['validacoes'][$key];
+        if (in_array("not null", $validation)) {
+          $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() == null || \$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() == \"\") {\n";
+          $class .= "			\$errors['" . $key . "'][] = \"O " . Controle::getSeparateName($key) . " do ". $lowerName ." é nulo\";\n";
+          $class .= "		}\n\n";
+        }
+        
+        if (in_array("unique", $validation)) {
+          $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != null || \$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != \"\") {\n";
+          $class .= "			\$object = \Modelo\\".Controle::getCapitalizedName($json_object['nome'])."::select()\n";
+          $class .= "			  ->where(\"".$key." like ?\", \$".$lowerName."->get" . Controle::getCapitalizedName($key) . "());\n";
+          $class .= "      if (\$".$lowerName."->getId() != null) \$object->where(\"id != ?\", \$".$lowerName."->getId());\n\n";
+          $class .= "      \$object = \$object->get(true, true);\n\n";
+          $class .= "      if (\$object) \$errors['".$key."'][] = \"Este ".Controle::getSeparateName($key)." já existe\";\n";
+          $class .= "		}\n\n";
+        }
       }
     }
     $class .= "\n";
@@ -156,10 +169,11 @@ class ControleOfControls
     $class .= "	public static function update(\\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . " \$" . $lowerName . ")\n";
     $class .= "	{\n";
     $class .= "		if (" . Controle::getCapitalizedName($json_object['nome']) . "::validate(\$" . $lowerName . ")) {\n";
-    $class .= "			\$old" . Controle::getCapitalizedName($json_object['nome']) . " = \\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . "::find(\$" . $lowerName . "->getId());\n";
+    $class .= "			\$old" . Controle::getCapitalizedName($json_object['nome']) . " = \\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . "::find(\$" . $lowerName . "->getId(), true);\n";
+    $class .= "			\$" . $lowerName . "_json = \\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . "::getJson(\$" . $lowerName . ");\n";
     $class .= "			if (\n				";
-    foreach ($json_object['atributos'] as $atributo) {
-      $class .= "\$old" . Controle::getCapitalizedName($json_object['nome']) . "->get" . Controle::getCapitalizedName($atributo['nome']) . "() === \$" . $lowerName . "->get" . Controle::getCapitalizedName($atributo['nome']) . "()\n				&& ";
+    foreach (array_filter($json_object['atributos'], function($atributo){return $atributo['tipo'] != "Object[]" && $atributo['tipo'] != "objeto";}) as $atributo) {
+      $class .= "\$old" . Controle::getCapitalizedName($json_object['nome']) . "['" . $atributo['nome'] . "'] == \$" . $lowerName . "_json['" . $atributo['nome'] . "']\n				&& ";
     }
     $class = substr($class, 0, strlen($class) - 7);
     $class .= "			) {\n";

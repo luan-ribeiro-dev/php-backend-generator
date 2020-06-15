@@ -5,7 +5,7 @@ spl_autoload_register(function ($className) {
     $className = explode("\\", $className);
     $className = $className[count($className) - 1];
   }
-  $directoryNames = ['app/modelo', 'app/controle', 'app/dao'];
+  $directoryNames = ['app/modelo', 'app/controle', 'app/dao', 'layout'];
   $includedClass = false;
 
   foreach ($directoryNames as $directoryName) {

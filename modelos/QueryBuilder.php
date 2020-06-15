@@ -2,6 +2,7 @@
 
 namespace DAO;
 
+use Controle\Geral;
 use Throwable;
 
 abstract class QueryBuilder
@@ -10,7 +11,12 @@ abstract class QueryBuilder
   private $columns;
   private $selectColumns = [];
   private $wheres = [];
-  private $args = [];
+  private $notIn = [];
+  /**
+   * @var WhereGroup[] $whereGroups
+   */
+  private $whereGroups = [];
+  protected $args = [];
   private $joins = [];
   private $orders = [];
   private $groups = [];
@@ -79,6 +85,28 @@ abstract class QueryBuilder
     return $this;
   }
 
+  public function notIn($column, $select_not, $type = 'and', $arg = null)
+  {
+    $this->notIn[] = [
+      "column" => $column,
+      "select_not" => $select_not,
+      "type" => $type
+    ];
+    if ($arg != null)
+      $this->args[] = $arg;
+    return $this;
+  }
+
+  /**
+   * Array item = ["condition" => $whereCondition, "arg" => $arg, "type" => $type]
+   * @return QueryBuilder
+   */
+  public function whereGroup(WhereGroup $whereGroup)
+  {
+    $this->whereGroups[] = $whereGroup;
+    return $this;
+  }
+
   /**
    * @return string
    */
@@ -96,6 +124,33 @@ abstract class QueryBuilder
         }
         $whereString .= $where['condition'];
       }
+    }
+    /**
+     * @var WhereGroup $whereGroup
+     */
+    foreach ($this->whereGroups as $whereGroup) {
+      if ($whereString != "") $whereString .= " " . $whereGroup->getType() . " ";
+      else $whereString = "where ";
+      $whereString .= "(";
+
+      $bool = false;
+      foreach ($whereGroup->getWheres() as $key => $where) {
+        if ($bool && $where['type'] === 'and') {
+          $whereString .= " and ";
+        } else if ($bool && $where['type'] === 'or') {
+          $whereString .= " or ";
+        }
+        $whereString .= $where['condition'];
+        $bool = true;
+        $this->args[] = $whereGroup->args[$key];
+      }
+      $whereString .= ")";
+    }
+    foreach ($this->notIn as $not) {
+      if ($whereString != "") $whereString .= " " . $not['type'] . " ";
+      else $whereString = "where ";
+
+      $whereString .= $not['column'] . " not in (" . $not['select_not'] . ") ";
     }
     return $whereString;
   }
@@ -248,6 +303,7 @@ abstract class QueryBuilder
       . $this->getGroupsString() . " "
       . $this->getLimitString($page) . " ";
     // echo var_dump([$query, $this->args]);
+    // echo json_encode($query);
     try {
       $conexao = new ConectaBanco();
       $result = $conexao->executeQuery($query, $this->args);
@@ -334,7 +390,6 @@ abstract class QueryBuilder
     }
     $query = substr($query, 0, strlen($query) - 2);
     $query .= " where id = ?";
-
     return $query;
   }
 
@@ -440,4 +495,35 @@ abstract class QueryBuilder
    * @return bool
    */
   public abstract function del();
+
+  /**
+   * Busca objetos de acordo com as querys de busca
+   *
+   * @param bool $json Se o retorno vai ser um json|array
+   * @param bool $single Se o retorno vai ser apenas um registro
+   * @param int $limit Se a busca vai ter limite
+   * @param int $page Caso a busca tenha um limite, esse parametro vai trazer as proximas posições desse limite
+   * @return self[]|array
+   */
+  public abstract function get(bool $json = false, bool $single = false, int $limit = null, int $page = 1, bool $appendChilds = true);
+
+  /**
+   * Get the value of wheres
+   */
+  public function getWheres()
+  {
+    return $this->wheres;
+  }
+
+  /**
+   * Set the value of wheres
+   *
+   * @return self
+   */
+  public function setWheres($wheres)
+  {
+    $this->wheres = $wheres;
+
+    return $this;
+  }
 }

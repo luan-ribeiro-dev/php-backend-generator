@@ -14,7 +14,7 @@
 			"nome":"Object", "tipo":"lista", "tabela_associativa": "table1_assoc_table2"
 		}}
 	],
-	"validacoes":[
-		{"nome": ["not null"]}
-	]
+	"validacoes":{
+    "nome": ["not null"]
+  }
 }

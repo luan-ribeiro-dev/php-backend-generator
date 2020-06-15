@@ -26,6 +26,21 @@ class ValidationException extends Exception
   }
 
   /**
+   * @return string
+   */
+  public function toString()
+  {
+    $message = "";
+    foreach ($this->errors as $error) {
+      foreach ($error as $e) {
+        $message .= $e . "\n";
+      }
+    }
+    if (strlen($message) > 1) $message = substr($message, 0, strlen($message) - 1);
+    return $message;
+  }
+
+  /**
    * @return array
    */
   public function getErrorAtribute()
