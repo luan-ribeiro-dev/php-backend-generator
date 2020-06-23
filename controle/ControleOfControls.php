@@ -46,6 +46,7 @@ class ControleOfControls
     ControleOfControls::checkAtributos($json_object, $class);
     ControleOfControls::getValidates($json_object, $class);
     ControleOfControls::getDatabaseChecks($json_object, $class);
+    ControleOfControls::getMiscs($json_object, $class);
 
     $class .= "\n}";
     $arquivo = APP_CONTROLE . "/" . Controle::getCapitalizedName($json_object['nome']) . ".php";
@@ -108,6 +109,18 @@ class ControleOfControls
           $class .= "      if (\$".$lowerName."->getId() != null) \$object->where(\"id != ?\", \$".$lowerName."->getId());\n\n";
           $class .= "      \$object = \$object->get(true, true);\n\n";
           $class .= "      if (\$object) \$errors['".$key."'][] = \"Este ".Controle::getSeparateName($key)." já existe\";\n";
+          $class .= "		}\n\n";
+        }
+        
+        if (in_array("date", $validation)) {
+          $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != null) {\n";
+          $class .= "			\$data = \$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "();\n";
+          $class .= "			\$year = intval(\$data->format(\"Y\"));\n";
+          $class .= "			if(\$year < 1940){\n";
+          $class .= "			  \$errors['".$key."'][] = \"O ano desta data é muito inferior\";\n";
+          $class .= "			}else if(\$year > 2040){\n";
+          $class .= "			  \$errors['".$key."'][] = \"O ano desta data é muito superior\";\n";
+          $class .= "			}\n";
           $class .= "		}\n\n";
         }
       }
@@ -204,6 +217,31 @@ class ControleOfControls
     $class .= "	}\n\n";
     // ----
     $class .= "	// Database Checks End\n";
+    $class .= "\n";
+  }
+
+  private static function getMiscs(array $json_object, string &$class)
+  {
+    $lowerName = strtolower($json_object['nome']);
+    $class .= "\n";
+
+    $class .= "	// Miscs Functions Start\n";
+    // getErrors
+    $class .= "	/**\n";
+    $class .= "	 * atribui erros a variável error pelo método validate()\n";
+    $class .= "	 */\n";
+    $class .= "	public static function setErrors(\\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . " \$" . $lowerName . ", &\$errors)\n";
+    $class .= "	{\n";
+    $class .= "		try {\n";
+    $class .= "			" . Controle::getCapitalizedName($json_object['nome']) . "::validate(\$" . $lowerName . ");\n";
+    $class .= "		} catch (\Modelo\ValidationException \$th) {\n";
+    $class .= "			foreach(\$th->getErrorAtribute() as \$key => \$error){\n";
+    $class .= "			  \$errors[\$key] = \$error;\n";
+    $class .= "		  }\n";
+    $class .= "		}\n";
+    $class .= "	}\n\n";
+    // ----
+    $class .= "	// Miscs Functions End\n";
     $class .= "\n";
   }
 }

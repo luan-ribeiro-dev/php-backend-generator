@@ -10,9 +10,12 @@
 		{"nome":"id_object", "tipo":"int", "link":{
 			"nome":"Object", "tipo":"objeto"
 		}},
-		{"nome":"objects", "tipo":"Object[]", "link":{
-			"nome":"Object", "tipo":"lista", "tabela_associativa": "table1_assoc_table2"
-		}}
+		{"nome":"object_name(s)", "tipo":"ObjectName[]", "link":{
+			"nome":"ObjectName(s)", "tipo":"lista", "tabela_associativa": "table1_assoc_table2"
+    }},
+    {"nome":"object_name", "tipo":"objeto_assoc", "link":{
+      "nome":"ObjectName", "tabela_associativa": "table_assoc_name"
+    }}
 	],
 	"validacoes":{
     "nome": ["not null"]
