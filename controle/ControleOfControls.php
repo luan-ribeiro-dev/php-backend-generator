@@ -185,7 +185,11 @@ class ControleOfControls
     $class .= "			\$old" . Controle::getCapitalizedName($json_object['nome']) . " = \\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . "::find(\$" . $lowerName . "->getId(), true);\n";
     $class .= "			\$" . $lowerName . "_json = \\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . "::getJson(\$" . $lowerName . ");\n";
     $class .= "			if (\n				";
-    foreach (array_filter($json_object['atributos'], function($atributo){return $atributo['tipo'] != "Object[]" && $atributo['tipo'] != "objeto";}) as $atributo) {
+    foreach (array_filter($json_object['atributos'], function($atributo){
+      return $atributo['tipo'] != "Object[]" 
+      && $atributo['tipo'] != "objeto"
+      && !isset($atributo['link']);
+    }) as $atributo) {
       $class .= "\$old" . Controle::getCapitalizedName($json_object['nome']) . "['" . $atributo['nome'] . "'] == \$" . $lowerName . "_json['" . $atributo['nome'] . "']\n				&& ";
     }
     $class = substr($class, 0, strlen($class) - 7);
