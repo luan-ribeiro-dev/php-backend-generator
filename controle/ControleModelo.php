@@ -245,7 +245,7 @@ class ControleModelo
     $class .= "	public function get(bool \$json = false, bool \$single = false, int \$limit = null, int \$page = 1, bool \$appendChilds = true)\n";
     $class .= "	{\n";
     $class .= "		\$" . $lowerName . "s = [];\n\n";
-    $class .= "		\$this->limit(\$limit);\n";
+    $class .= "		if(\$limit != null) \$this->limit(\$limit);\n";
     $class .= "		\$objects = parent::getObjects(\$page);\n\n";
     $class .= "		if (\$objects != null) {\n";
     $class .= "			foreach (\$objects as \$object) {\n";
