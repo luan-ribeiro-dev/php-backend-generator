@@ -300,7 +300,12 @@ class ControleModelo
           if (count($object) == 0) throw new Exception("arquivo " . $atributo['link']['nome'] . " do modelo " . $atributo['link']['tipo'] . " Não foi encontrado");
           else $object = array_values($object)[0];
           $class .= "\n			$" . $atributo['nome'] . " = " . Controle::getCapitalizedName($atributo['link']['nome']) . "::select()\n";
-          $class .= "				->innerJoin('" . $atributo['link']['tabela_associativa'] . "', '" . $atributo['link']['tabela_associativa'] . ".id_" . strtolower($atributo['link']['nome']) . " = " . $object['nome_tabela'] . ".id')\n";
+          if(isset($atributo['link']['id_assoc']))
+            $id = "id_contrato_assoc_cliente";
+          else
+            $id = "id_" . strtolower($atributo['link']['nome']);
+
+          $class .= "				->innerJoin('" . $atributo['link']['tabela_associativa'] . "', '" . $atributo['link']['tabela_associativa'] . ".". $id . " = " . $object['nome_tabela'] . ".id')\n";
           $class .= "				->where('" . $atributo['link']['tabela_associativa'] . ".id_" . $lowerName . " = ?', \$this->getId())\n";
 
           if ($atributo['tipo'] == "objeto_assoc") {
@@ -341,7 +346,13 @@ class ControleModelo
           if (count($object) == 0) throw new Exception("arquivo do modelo " . $atributo['link']['tipo'] . " Não foi encontrado");
           else $object = array_values($object)[0];
           $class .= "\n			$" . $atributo['nome'] . " = " . Controle::getCapitalizedName($atributo['link']['nome']) . "::select()\n";
-          $class .= "				->innerJoin('" . $atributo['link']['tabela_associativa'] . "', '" . $atributo['link']['tabela_associativa'] . ".id_" . strtolower($atributo['link']['nome']) . " = " . $object['nome_tabela'] . ".id')\n";
+
+          if(isset($atributo['link']['id_assoc']))
+            $id = "id_contrato_assoc_cliente";
+          else
+            $id = "id_" . strtolower($atributo['link']['nome']);
+
+          $class .= "				->innerJoin('" . $atributo['link']['tabela_associativa'] . "', '" . $atributo['link']['tabela_associativa'] . "." . $id . " = " . $object['nome_tabela'] . ".id')\n";
           $class .= "				->where('" . $atributo['link']['tabela_associativa'] . ".id_" . $lowerName . " = ?', \$" . $lowerName . "['id'])\n";
 
           if ($atributo['tipo'] == "objeto_assoc")
