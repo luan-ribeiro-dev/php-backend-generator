@@ -1,0 +1,285 @@
+@import "colors.scss";
+
+body {
+  overflow-x: hidden;
+}
+
+.table-responsive .pagination .page-link {
+  border-radius: 0 !important;
+  width: auto;
+  padding: 0 10px;
+}
+
+.form-control {
+  color: #111;
+  &:focus {
+    color: #000;
+  }
+}
+
+.ui-autocomplete {
+  background-color: #fff;
+  border: 1px solid #aaa;
+  border-radius: 0.3rem;
+  padding: 0;
+  list-style-type: none;
+
+  & li {
+    padding: 0.4rem;
+    cursor: pointer;
+
+    &:hover,
+    &:focus {
+      background-color: #5e72e4;
+      color: #fff;
+    }
+  }
+}
+
+.footer-auto-bottom {
+  position: relative;
+}
+
+.form-group .remove {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  border: 1px solid #dee2e6;
+  width: 46px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #ddd;
+  }
+
+  .fa-times {
+    font-size: 22px;
+  }
+}
+
+.modal-content {
+  max-height: 90vh;
+  overflow-y: auto;
+
+  .card {
+    border: 1px solid #dee2e6;
+    box-shadow: none;
+    font-size: 0.95rem;
+
+    .card-header {
+      padding: 0.3rem 1rem;
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        margin: 0;
+      }
+    }
+
+    .form-control {
+      height: calc(0.5em + 1.25rem + 5px);
+    }
+
+    .table thead th {
+      padding: 0.5rem;
+    }
+
+    .table tbody td {
+      padding: 0.5rem;
+
+      button {
+        margin: 0 0.2rem;
+      }
+    }
+  }
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    cursor: pointer;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    cursor: pointer;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background: $azul;
+    cursor: pointer;
+  }
+
+  /* Handle on hover */
+  &::-webkit-scrollbar-thumb:hover {
+    background: darken($azul, 7%);
+  }
+
+  .input-group-text {
+    color: #000;
+    background-color: #eee;
+  }
+
+  .input-group-append {
+    button {
+      border: 1px solid #dee2e6;
+      background-color: #eee;
+      color: #000;
+    }
+  }
+}
+
+.object-container li {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  justify-content: space-between;
+
+  .remove {
+    border: 0;
+    width: auto;
+
+    &:hover {
+      background-color: inherit;
+    }
+  }
+}
+
+#contrato-avaliacao-stars {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  justify-content: flex-start;
+
+  .fa-star {
+    font-size: 2rem;
+    transition: 0.2s;
+    cursor: pointer;
+  }
+}
+
+.card-boleto {
+  .info-message {
+    display: flex;
+    align-items: center;
+    align-content: center;
+
+    i {
+      margin: 1rem;
+    }
+  }
+}
+
+.imposto-div {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  justify-content: flex-start;
+  flex-direction: column;
+  width: 100%;
+
+  .item {
+    width: 100%;
+    border: 1px solid $bootstrap-input-border;
+    padding: 1rem;
+    margin: 7px 0;
+    -webkit-box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.75);
+    box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.75);
+    line-height: 0.6;
+
+    .col {
+      text-align: center;
+      display: flex;
+      align-content: center;
+      align-items: center;
+
+      a {
+        color: inherit;
+        i {
+          margin: 0.3rem;
+          font-size: 25px;
+          cursor: pointer;
+          transition: 0.35s;
+
+          &:hover {
+            color: #111;
+          }
+        }
+      }
+    }
+  }
+}
+
+.card-dashboard {
+  box-shadow: 5px 10px 10px rgba(0, 0, 0, 0.3);
+}
+
+.card-dashboard-link {
+  transition: 0.3s;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+.plus-minus {
+  i {
+    font-size: 15px;
+    cursor: pointer;
+    margin: 5px;
+    transition: 0.3s;
+    user-select: none;
+
+    &:hover {
+      transform: scale(1.5);
+      color: #000;
+    }
+  }
+}
+
+.checkbox-tarefa {
+  transform: scale(1.5);
+}
+
+.checkbox-tarefa{
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.tr-tarefa{
+  cursor: pointer;
+  transition: .3s;
+  user-select: none;
+  &:hover{
+    background-color: #DDD;
+    transform: translateY(-3px);
+  }
+}
+.complete-task {
+  background-color: #ddd;
+  transform: scale(1);
+  transition: .2s;
+
+  &::after {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 1px;
+    background: #000;
+    content: "";
+    width: 100%;
+    display: block;
+  }
+}
+
+@media (min-width: 576px) {
+  .modal-dialog {
+    width: 80%;
+    max-width: none;
+  }
+}

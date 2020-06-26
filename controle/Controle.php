@@ -59,6 +59,7 @@ class Controle
   {
     copy(ROOT . "/modelos/Geral.php", APP_CONTROLE . "/Geral.php");
     copy(ROOT . "/modelos/Constantes.php", APP_CONTROLE . "/Constantes.php");
+    copy(ROOT . "/modelos/API.php", APP_CONTROLE . "/API.php");
   }
 
   public static function copyAppDefault()
