@@ -79,9 +79,9 @@ abstract class QueryBuilder
   {
     $this->wheres[] = [
       "condition" => $whereCondition,
-      "type" => $type
+      "type" => $type,
+      "arg" => $arg
     ];
-    $this->args[] = $arg;
     return $this;
   }
 
@@ -90,10 +90,9 @@ abstract class QueryBuilder
     $this->notIn[] = [
       "column" => $column,
       "select_not" => $select_not,
-      "type" => $type
+      "type" => $type,
+      "arg" => $arg
     ];
-    if ($arg != null)
-      $this->args[] = $arg;
     return $this;
   }
 
@@ -124,6 +123,8 @@ abstract class QueryBuilder
         }
         $whereString .= $where['condition'];
       }
+
+      $this->args[] = $where['arg'];
     }
     /**
      * @var WhereGroup $whereGroup
@@ -142,7 +143,9 @@ abstract class QueryBuilder
         }
         $whereString .= $where['condition'];
         $bool = true;
-        $this->args[] = $whereGroup->args[$key];
+        
+        if ($where['arg'] != null)
+        $this->args[] = $where['arg'];
       }
       $whereString .= ")";
     }
@@ -151,6 +154,8 @@ abstract class QueryBuilder
       else $whereString = "where ";
 
       $whereString .= $not['column'] . " not in (" . $not['select_not'] . ") ";
+      if ($not['arg'] != null)
+        $this->args[] = $not['arg'];
     }
     return $whereString;
   }
@@ -303,7 +308,7 @@ abstract class QueryBuilder
       . $this->getGroupsString() . " "
       . $this->getLimitString($page) . " ";
     // echo var_dump([$query, $this->args]);
-    // echo json_encode($query);
+    // echo json_encode([$query, $this->args]);
     try {
       $conexao = new ConectaBanco();
       $result = $conexao->executeQuery($query, $this->args);
@@ -402,6 +407,7 @@ abstract class QueryBuilder
       $conexao = new ConectaBanco();
       $args = $this->getArgs();
       $args[] = $args[0];
+      // echo var_dump([$this->getUpdateString(), $args]);
       $result = $conexao->executeQuery($this->getUpdateString(), $args);
       return $result;
     } catch (Throwable $error) {
@@ -427,6 +433,7 @@ abstract class QueryBuilder
   {
     try {
       $conexao = new ConectaBanco();
+      // echo json_encode([$this->getDeleteString(), [$this->getArgs()[0]]]);
       $result = $conexao->executeQuery($this->getDeleteString(), [$this->getArgs()[0]]);
       return $result;
     } catch (Throwable $error) {
@@ -503,7 +510,7 @@ abstract class QueryBuilder
    * @param bool $single Se o retorno vai ser apenas um registro
    * @param int $limit Se a busca vai ter limite
    * @param int $page Caso a busca tenha um limite, esse parametro vai trazer as proximas posições desse limite
-   * @return self[]|array
+   * @return self|self[]|array
    */
   public abstract function get(bool $json = false, bool $single = false, int $limit = null, int $page = 1, bool $appendChilds = true);
 
