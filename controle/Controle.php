@@ -1,6 +1,23 @@
 <?php
 class Controle
 {
+
+  public static function copy_dir($src, $dst)
+  {
+    $dir = opendir($src);
+    @mkdir($dst);
+    while (false !== ($file = readdir($dir))) {
+      if (($file != '.') && ($file != '..')) {
+        if (is_dir($src . '/' . $file)) {
+          Controle::copy_dir($src . '/' . $file, $dst . '/' . $file);
+        } else {
+          copy($src . '/' . $file, $dst . '/' . $file);
+        }
+      }
+    }
+    closedir($dir);
+  }
+
   public static function checkAPIDir()
   {
     if (!is_dir(API)) mkdir(API, 0777, true);
@@ -79,23 +96,23 @@ class Controle
 
   public static function copyAssetsDefault()
   {
-    copy(ROOT_SCRIPTS, ASSETS_CUSTOM_SCRIPTS);
-    copy(ROOT_STYLES, ASSETS_SCSS."/custom_styles");
+    Controle::copy_dir(ROOT_SCRIPTS, ASSETS_CUSTOM_SCRIPTS);
+    Controle::copy_dir(ROOT_STYLES, ASSETS_SCSS . "/custom_styles");
   }
 
   public static function copyLayoutDefaultClasses()
   {
-    copy(ROOT_MODELS . "/layout_classes", LAYOUT);
+    Controle::copy_dir(ROOT_MODELS . "/layout_classes", LAYOUT);
   }
 
   public static function copyRouteExample()
   {
-    copy(ROOT_EXAMPLES . "/route_example", ROUTE."/example.php");
+    copy(ROOT_EXAMPLES . "/route_example.php", ROUTE . "/example.php");
   }
 
   public static function copyViewDefault()
   {
-    copy(ROOT_LAYOUT_VIEW, VIEW);
+    Controle::copy_dir(ROOT_LAYOUT_VIEW, VIEW);
   }
 
   public static function copyExceptionDefaultClasses()
