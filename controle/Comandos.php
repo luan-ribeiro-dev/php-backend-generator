@@ -22,7 +22,13 @@ class Comandos
 			Controle::copyExceptionDefaultClasses();
 			Controle::copyControllerDefaultClasses();
 			Controle::copyAppDefault();
-			Controle::generateModels(true);
+      
+      Controle::copyAssetsDefault();
+      Controle::copyLayoutDefaultClasses();
+      Controle::copyRouteExample();
+      Controle::copyViewDefault();
+      
+      Controle::generateModels(true);
 			Controle::generateControls(true);
 			// Controle::generateSQL();
 		});

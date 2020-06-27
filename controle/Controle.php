@@ -1,6 +1,11 @@
 <?php
 class Controle
 {
+  public static function checkAPIDir()
+  {
+    if (!is_dir(API)) mkdir(API, 0777, true);
+  }
+
   public static function checkMainDir()
   {
     if (!is_dir(APPLICATION)) mkdir(APPLICATION, 0777, true);
@@ -12,6 +17,34 @@ class Controle
     if (!is_dir(APP_MODEL)) mkdir(APP_MODEL, 0777, true);
     if (!is_dir(APP_CONTROLE)) mkdir(APP_CONTROLE, 0777, true);
     if (!is_dir(APP_DAO)) mkdir(APP_DAO, 0777, true);
+  }
+
+  public static function checkAssetsDir()
+  {
+    if (!is_dir(ASSETS)) mkdir(ASSETS, 0777, true);
+
+    if (!is_dir(ASSETS_JS)) mkdir(ASSETS_JS, 0777, true);
+    if (!is_dir(ASSETS_CUSTOM_SCRIPTS)) mkdir(ASSETS_CUSTOM_SCRIPTS, 0777, true);
+
+    if (!is_dir(ASSETS_CSS)) mkdir(ASSETS_CSS, 0777, true);
+    if (!is_dir(ASSETS_SCSS)) mkdir(ASSETS_SCSS, 0777, true);
+  }
+
+  public static function checkLayoutDir()
+  {
+    if (!is_dir(LAYOUT)) mkdir(LAYOUT, 0777, true);
+  }
+
+  public static function checkRouteDir()
+  {
+    if (!is_dir(ROUTE)) mkdir(ROUTE, 0777, true);
+  }
+
+  public static function checkViewDir()
+  {
+    if (!is_dir(VIEW)) mkdir(VIEW, 0777, true);
+    if (!is_dir(VIEW_LAYOUT)) mkdir(VIEW_LAYOUT, 0777, true);
+    if (!is_dir(VIEW_LAYOUT_TEMPLATE)) mkdir(VIEW_LAYOUT_TEMPLATE, 0777, true);
   }
 
   public static function checkConfigFile()
@@ -40,14 +73,29 @@ class Controle
 
   public static function copyDaoDefaultClasses()
   {
-    $config = Controle::getConfig();
-
-    $database = file_get_contents(ROOT_MODELS . "/ConectaBanco.php");
-
-    $arquivo = fopen(APP_DAO . "/ConectaBanco.php", "w");
-    fwrite($arquivo, $database);
-
+    copy(ROOT_MODELS . "/ConectaBanco.php", APP_DAO . "/ConectaBanco.php");
     copy(ROOT_MODELS . "/QueryBuilder.php", APP_DAO . "/QueryBuilder.php");
+  }
+
+  public static function copyAssetsDefault()
+  {
+    copy(ROOT_SCRIPTS, ASSETS_CUSTOM_SCRIPTS);
+    copy(ROOT_STYLES, ASSETS_SCSS."/custom_styles");
+  }
+
+  public static function copyLayoutDefaultClasses()
+  {
+    copy(ROOT_MODELS . "/layout_classes", LAYOUT);
+  }
+
+  public static function copyRouteExample()
+  {
+    copy(ROOT_EXAMPLES . "/route_example", ROUTE."/example.php");
+  }
+
+  public static function copyViewDefault()
+  {
+    copy(ROOT_LAYOUT_VIEW, VIEW);
   }
 
   public static function copyExceptionDefaultClasses()
@@ -126,7 +174,12 @@ class Controle
 
   public static function checkDirs()
   {
+    Controle::checkAPIDir();
     Controle::checkMainDir();
     Controle::checkBackendDirs();
+    Controle::checkAssetsDir();
+    Controle::checkLayoutDir();
+    Controle::checkRouteDir();
+    Controle::checkViewDir();
   }
 }

@@ -21,6 +21,8 @@ spl_autoload_register(function ($className) {
 
 define("ROOT_PROJECT", dirname(__DIR__));
 
+define("API", ROOT_PROJECT . "/api");
+
 define("APP", ROOT_PROJECT . "/app");
 define("APP_MODEL", APP . "/modelo");
 define("APP_CONTROLE", APP . "/controle");
@@ -35,11 +37,17 @@ define("ASSETS_JS", ASSETS . "/js");
 define("ASSETS_CUSTOM_SCRIPTS", ASSETS_JS . "/custom_scripts");
 define("ASSETS_CSS", ASSETS . "/css");
 define("ASSETS_SCSS", ASSETS . "/scss");
+define("ASSETS_CUSTOM_STYLES", ASSETS . "/custom_styles");
+
+define("LAYOUT", ROOT_PROJECT . "/layout");
+
+define("ROUTE", ROOT_PROJECT . "/route");
 
 define("APPLICATION", APP . "/generator");
 define("APPLICATION_MODELS", APPLICATION . "/models");
 
 define("ROOT", __DIR__);
+define("ROOT_EXAMPLES", ROOT."/examples");
 define("ROOT_MODELS", ROOT."/modelos");
 define("ROOT_LAYOUT_CLASSES", ROOT_MODELS."/layout_classes");
 define("ROOT_LAYOUT_VIEW", ROOT_MODELS."/layout_view");
