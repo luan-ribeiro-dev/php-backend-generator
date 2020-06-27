@@ -1,22 +1,18 @@
-<?php 
-
-use \Modelo\Usuario;
-?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
-  @include('layout.adm.head')
+  @include('layout.template.head')
   
   @yield('head-section')
 </head>
 
 <body>
-  @include('layout.adm.sidenav')
+  @include('layout.template.sidenav')
 
-  @include('layout.adm.content')
+  @include('layout.template.content')
 
-  @include('layout.adm.foot')
+  @include('layout.template.foot')
 
   @yield('script-end')
 </body>
