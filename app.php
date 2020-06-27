@@ -41,7 +41,7 @@ define("ASSETS_CUSTOM_STYLES", ASSETS . "/custom_styles");
 
 define("LAYOUT", ROOT_PROJECT . "/layout");
 
-define("ROUTE", ROOT_PROJECT . "/route");
+define("ROUTE", ROOT_PROJECT . "/routes");
 
 define("APPLICATION", APP . "/generator");
 define("APPLICATION_MODELS", APPLICATION . "/models");
