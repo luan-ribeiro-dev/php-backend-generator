@@ -112,7 +112,7 @@ class Controle
 
   public static function copyViewDefault()
   {
-    copy(ROOT_EXAMPLES."/blade_example.blade.php", VIEW);
+    copy(ROOT_EXAMPLES."/blade_example.blade.php", VIEW."/example.blade.php");
     Controle::copy_dir(ROOT_LAYOUT_VIEW, VIEW_LAYOUT);
   }
 
