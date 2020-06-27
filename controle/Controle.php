@@ -112,7 +112,7 @@ class Controle
 
   public static function copyViewDefault()
   {
-    Controle::copy_dir(ROOT_LAYOUT_VIEW, VIEW_LAYOUT_TEMPLATE);
+    Controle::copy_dir(ROOT_LAYOUT_VIEW, VIEW_LAYOUT);
   }
 
   public static function copyExceptionDefaultClasses()
