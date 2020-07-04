@@ -482,9 +482,10 @@ class ControleModelo
     $class .= "	 *\n";
     $class .= "	 * @return " . Controle::getCapitalizedName($json_object['nome']) . "\n";
     $class .= "	 */\n";
-    $class .= "	public static function getPostObject(array \$post_data)\n";
+    $class .= "	public static function getPostObject(array \$post_data, int \$id = null)\n";
     $class .= "	{\n";
-    $class .= "		$" . $lowerName . " = new " . Controle::getCapitalizedName($json_object['nome']) . "();\n";
+    $class .= "		if(\$id != null) $" . $lowerName . " = " . Controle::getCapitalizedName($json_object['nome']) . "::find(\$id);\n";
+    $class .= "		else $" . $lowerName . " = new " . Controle::getCapitalizedName($json_object['nome']) . "();\n";
     foreach ($json_object['atributos'] as $atributo) {
       if ($atributo['tipo'] == 'float') {
         $class .= "\n		try {\n";
