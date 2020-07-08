@@ -499,7 +499,7 @@ class ControleModelo
         $class .= "			\$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(0.0);\n";
         $class .= "		}\n";
       } else if ($atributo['tipo'] == 'DateTime') {
-        $class .= "\n		if (isset(\$post_data['" . $atributo['nome'] . "']) && \$post_data['" . $atributo['nome'] . "']!= null) {\n";
+        $class .= "\n		if (isset(\$post_data['" . $atributo['nome'] . "'])) {\n";
         $class .= "			try {\n";
         $class .= "				\$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(new DateTime(\$post_data['" . $atributo['nome'] . "']));\n";
         $class .= "			} catch (Throwable \$th) {\n";
@@ -507,17 +507,17 @@ class ControleModelo
         $class .= "			}\n";
         $class .= "		}\n";
       } else if ($atributo['tipo'] == 'int') {
-        $class .= "\n		if (isset(\$post_data['" . $atributo['nome'] . "']) && \$post_data['" . $atributo['nome'] . "'] != null) \$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(intval(\$post_data['" . $atributo['nome'] . "']));\n";
+        $class .= "\n		if (isset(\$post_data['" . $atributo['nome'] . "'])) \$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(intval(\$post_data['" . $atributo['nome'] . "']));\n";
       } else if ($atributo['tipo'] == "objeto_assoc") {
-        $class .= "\n		if (isset(\$post_data['" . $atributo['nome'] . "']) && \$post_data['" . $atributo['nome'] . "'] != null) \$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(" . Controle::getCapitalizedName($atributo['nome']) . "::getObject(\$post_data['" . $atributo['nome'] . "']));\n";
+        $class .= "\n		if (isset(\$post_data['" . $atributo['nome'] . "'])) \$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(" . Controle::getCapitalizedName($atributo['nome']) . "::getObject(\$post_data['" . $atributo['nome'] . "']));\n";
       } else if (isset($atributo['link']) && $atributo['link']['tipo'] == "lista") {
-        $class .= "\n		if (isset(\$post_data['" . $atributo['nome'] . "']) && \$post_data['" . $atributo['nome'] . "'] != null){\n";
+        $class .= "\n		if (isset(\$post_data['" . $atributo['nome'] . "'])){\n";
         $class .= "			$" . $atributo['nome'] . " = [];\n";
         $class .= "			foreach(json_decode(\$post_data['" . $atributo['nome'] . "'], true) as \$object) $" . $atributo['nome'] . "[] = " . Controle::getCapitalizedName($atributo['link']['nome']) . "::getObject(\$object);\n";
         $class .= "			\$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(\$".$atributo['nome'].");\n";
         $class .= "		}\n";
       } else {
-        $class .= "\n		if (isset(\$post_data['" . $atributo['nome'] . "']) && \$post_data['" . $atributo['nome'] . "'] != null) \$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(\$post_data['" . $atributo['nome'] . "']);\n";
+        $class .= "\n		if (isset(\$post_data['" . $atributo['nome'] . "'])) \$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(\$post_data['" . $atributo['nome'] . "']);\n";
       }
     }
     $class .= "		return $" . $lowerName . ";\n";
