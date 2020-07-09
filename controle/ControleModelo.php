@@ -301,7 +301,7 @@ class ControleModelo
           else $object = array_values($object)[0];
           $class .= "\n			$" . $atributo['nome'] . " = " . Controle::getCapitalizedName($atributo['link']['nome']) . "::select()\n";
           if(isset($atributo['link']['id_assoc']))
-            $id = "id_contrato_assoc_cliente";
+            $id = $atributo['link']['id_assoc'];
           else
             $id = "id_" . strtolower($atributo['link']['nome']);
 
@@ -348,7 +348,7 @@ class ControleModelo
           $class .= "\n			$" . $atributo['nome'] . " = " . Controle::getCapitalizedName($atributo['link']['nome']) . "::select()\n";
 
           if(isset($atributo['link']['id_assoc']))
-            $id = "id_contrato_assoc_cliente";
+            $id = $atributo['link']['id_assoc'];
           else
             $id = "id_" . strtolower($atributo['link']['nome']);
 
