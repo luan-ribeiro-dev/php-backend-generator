@@ -12,7 +12,8 @@
 		}},
 		{"nome":"object_name(s)", "tipo":"ObjectName[]", "link":{
       "nome":"ObjectName(s)", "tipo":"lista", "tabela_associativa": "table1_assoc_table2",
-      "id_assoc": "(opcional) id_assoc_of_the_table"
+      "id_assoc": "(opcional) id_assoc_of_the_table",
+      "alone": false
     }},
     {"nome":"object_name", "tipo":"objeto_assoc", "link":{
       "nome":"ObjectName", "tabela_associativa": "table_assoc_name"

@@ -107,7 +107,7 @@ class Controle
 
   public static function copyRouteExample()
   {
-    copy(ROOT_EXAMPLES . "/route_example.php", ROUTE . "/example.php");
+    // copy(ROOT_EXAMPLES . "/route_example.php", ROUTE . "/example.php");
   }
 
   public static function copyViewDefault()
@@ -197,7 +197,7 @@ class Controle
     Controle::checkBackendDirs();
     Controle::checkAssetsDir();
     Controle::checkLayoutDir();
-    Controle::checkRouteDir();
+    // Controle::checkRouteDir();
     Controle::checkViewDir();
   }
 }
