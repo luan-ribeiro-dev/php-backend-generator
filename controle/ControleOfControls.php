@@ -211,10 +211,10 @@ class ControleOfControls
     $class .= "	 * @return bool Se for validado e deletado\n";
     $class .= "	 * @throws Exception Validacao ou erro com o banco de dados\n";
     $class .= "	 */\n";
-    $class .= "	public static function delete(\\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . " \$" . $lowerName . ")\n";
+    $class .= "	public static function delete(\\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . " \$" . $lowerName . ", \$bool = false)\n";
     $class .= "	{\n";
     $class .= "		if (" . Controle::getCapitalizedName($json_object['nome']) . "::validateDelete(\$" . $lowerName . ")) {\n";
-    $class .= "			return \$" . $lowerName . "->del();\n";
+    $class .= "			return \$" . $lowerName . "->del(\$bool);\n";
     $class .= "		} else {\n";
     $class .= "			return false;\n";
     $class .= "		}\n";
