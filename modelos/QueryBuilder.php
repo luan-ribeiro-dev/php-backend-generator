@@ -21,6 +21,7 @@ abstract class QueryBuilder
   private $orders = [];
   private $groups = [];
   private $limit = null;
+  private $remove_hour = true;
 
   /**
    * @var int $last_id
@@ -75,13 +76,18 @@ abstract class QueryBuilder
   /**
    * @return QueryBuilder
    */
-  public function where($whereCondition, $arg = null, $type = 'and')
+  public function where($whereCondition, $arg = null, $type = 'and', $remove_arg = false)
   {
-    $this->wheres[] = [
+    $where = [
       "condition" => $whereCondition,
-      "type" => $type,
-      "arg" => $arg
+      "type" => $type
     ];
+
+    if(!$remove_arg){
+      $where['arg'] = $arg;
+    }
+
+    $this->wheres[] = $where;
     return $this;
   }
 
@@ -124,7 +130,8 @@ abstract class QueryBuilder
         $whereString .= $where['condition'];
       }
 
-      $this->args[] = $where['arg'];
+      if(isset($where['arg']))
+        $this->args[] = $where['arg'];
     }
     /**
      * @var WhereGroup $whereGroup
@@ -320,9 +327,11 @@ abstract class QueryBuilder
     }
   }
 
-  public function count()
+  public function count($column = null)
   {
-    $query = "select count(" . $this->table . ".id) as quantity from " . $this->table . " "
+    if($column == null) $column = $this->table.".id";
+
+    $query = "select count(".$column.") as quantity from " . $this->table . " "
       . $this->getJoinsString() . " "
       . $this->getWheresString() . " "
       . $this->getOrdersString() . " "
@@ -371,6 +380,7 @@ abstract class QueryBuilder
       // echo var_dump($this->getArgs());
       $result = $conexao->executeQuery($this->getInsertString(), $this->getArgs());
       // echo var_dump($result);
+      // echo var_dump($result);
       if ($result) {
         $this->setLastId($conexao->getLastInsertedID());
       }
@@ -407,7 +417,7 @@ abstract class QueryBuilder
       $conexao = new ConectaBanco();
       $args = $this->getArgs();
       $args[] = $args[0];
-      // echo var_dump([$this->getUpdateString(), $args]);
+      // echo json_encode([$this->getUpdateString(), $args]);
       $result = $conexao->executeQuery($this->getUpdateString(), $args);
       return $result;
     } catch (Throwable $error) {
@@ -501,7 +511,7 @@ abstract class QueryBuilder
   /**
    * @return bool
    */
-  public abstract function del();
+  public abstract function del($bool = false);
 
   /**
    * Busca objetos de acordo com as querys de busca
@@ -530,6 +540,26 @@ abstract class QueryBuilder
   public function setWheres($wheres)
   {
     $this->wheres = $wheres;
+
+    return $this;
+  }
+
+  /**
+   * Get the value of remove_hour
+   */ 
+  public function getRemoveHour()
+  {
+    return $this->remove_hour;
+  }
+
+  /**
+   * Set the value of remove_hour
+   *
+   * @return self
+   */ 
+  public function setRemoveHour($remove_hour)
+  {
+    $this->remove_hour = $remove_hour;
 
     return $this;
   }

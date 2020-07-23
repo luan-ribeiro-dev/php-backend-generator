@@ -93,33 +93,49 @@ class ControleOfControls
     foreach (array_map(function ($json) {
       return $json['nome'];
     }, $json_object['atributos']) as $key) {
-      
+
       if (in_array($key, array_keys($json_object['validacoes']))) {
         $validation = $json_object['validacoes'][$key];
         if (in_array("not null", $validation)) {
           $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() == null || \$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() == \"\") {\n";
-          $class .= "			\$errors['" . $key . "'][] = \"O " . Controle::getSeparateName($key) . " do ". $lowerName ." é nulo\";\n";
+          $class .= "			\$errors['" . $key . "'][] = \"O " . Controle::getSeparateName($key) . " do " . $lowerName . " é nulo\";\n";
           $class .= "		}\n\n";
         }
-        
+
         if (in_array("unique", $validation)) {
           $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != null || \$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != \"\") {\n";
-          $class .= "			\$object = \Modelo\\".Controle::getCapitalizedName($json_object['nome'])."::select()\n";
-          $class .= "			  ->where(\"".$key." like ?\", \$".$lowerName."->get" . Controle::getCapitalizedName($key) . "());\n";
-          $class .= "      if (\$".$lowerName."->getId() != null) \$object->where(\"id != ?\", \$".$lowerName."->getId());\n\n";
+          $class .= "			\$object = \Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . "::select()\n";
+          $class .= "			  ->where(\"" . $key . " like ?\", \$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "());\n";
+          $class .= "      if (\$" . $lowerName . "->getId() != null) \$object->where(\"id != ?\", \$" . $lowerName . "->getId());\n\n";
           $class .= "      \$object = \$object->get(true, true);\n\n";
-          $class .= "      if (\$object) \$errors['".$key."'][] = \"Este ".Controle::getSeparateName($key)." já existe\";\n";
+          $class .= "      if (\$object) \$errors['" . $key . "'][] = \"Este " . Controle::getSeparateName($key) . " já existe\";\n";
           $class .= "		}\n\n";
         }
-        
+
+        if (in_array("cpf", $validation)) {
+          $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != null) {\n";
+          $class .= "		  if (!Geral::validar_cpf(\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "())) {\n";
+          $class .= "				\$errors['" . $key . "'][] = \"CPF inválido\";\n";
+          $class .= "		  }\n";
+          $class .= "		}\n\n";
+        }
+
+        if (in_array("telefone", $validation)) {
+          $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != null) {\n";
+          $class .= "		  if (!Geral::validar_numero_celular(\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "())) {\n";
+          $class .= "				\$errors['" . $key . "'][] = \"Número de telefone inválido\";\n";
+          $class .= "		  }\n";
+          $class .= "		}\n\n";
+        }
+
         if (in_array("date", $validation)) {
           $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != null) {\n";
           $class .= "			\$data = \$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "();\n";
           $class .= "			\$year = intval(\$data->format(\"Y\"));\n";
           $class .= "			if(\$year < 1940){\n";
-          $class .= "			  \$errors['".$key."'][] = \"O ano desta data é muito inferior\";\n";
+          $class .= "			  \$errors['" . $key . "'][] = \"O ano desta data é muito inferior\";\n";
           $class .= "			}else if(\$year > 2040){\n";
-          $class .= "			  \$errors['".$key."'][] = \"O ano desta data é muito superior\";\n";
+          $class .= "			  \$errors['" . $key . "'][] = \"O ano desta data é muito superior\";\n";
           $class .= "			}\n";
           $class .= "		}\n\n";
         }
@@ -185,10 +201,10 @@ class ControleOfControls
     $class .= "			\$old" . Controle::getCapitalizedName($json_object['nome']) . " = \\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . "::find(\$" . $lowerName . "->getId(), true);\n";
     $class .= "			\$" . $lowerName . "_json = \\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . "::getJson(\$" . $lowerName . ");\n";
     $class .= "			if (\n				";
-    foreach (array_filter($json_object['atributos'], function($atributo){
-      return $atributo['tipo'] != "Object[]" 
-      && $atributo['tipo'] != "objeto"
-      && !isset($atributo['link']);
+    foreach (array_filter($json_object['atributos'], function ($atributo) {
+      return $atributo['tipo'] != "Object[]"
+        && $atributo['tipo'] != "objeto"
+        && !isset($atributo['link']);
     }) as $atributo) {
       $class .= "\$old" . Controle::getCapitalizedName($json_object['nome']) . "['" . $atributo['nome'] . "'] == \$" . $lowerName . "_json['" . $atributo['nome'] . "']\n				&& ";
     }
