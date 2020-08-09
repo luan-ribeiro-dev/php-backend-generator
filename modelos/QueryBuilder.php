@@ -338,6 +338,8 @@ abstract class QueryBuilder
       . $this->getGroupsString();
     try {
       $conexao = new ConectaBanco();
+      // echo json_encode([$query, $this->args]);
+      echo var_dump([$query, $this->args]);
       $result = $conexao->executeQuery($query, $this->args)[0];
       return $result['quantity'];
     } catch (\Throwable $th) {
