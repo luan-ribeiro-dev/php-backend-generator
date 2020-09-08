@@ -24,6 +24,7 @@ if ($(estado).length > 0 && $(cidade).length > 0) {
 
         $.each(data, function (key, val) {
           if (val.nome == str) {
+            options_cidades += '<option value="">Selecione uma cidade</option>';
             $.each(val.cidades, function (key_city, val_city) {
               options_cidades += '<option value="' + val_city + '">' + val_city + '</option>';
             });

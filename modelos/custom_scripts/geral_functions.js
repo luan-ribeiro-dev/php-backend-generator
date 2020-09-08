@@ -66,7 +66,7 @@ function validarCPF(cpf) {
 
 function format_value(value) {
   value = value.toString();
-  if(!value) return 0;
+  if (!value) return 0;
   if (value.includes("R$") || value.includes(","))
     return parseFloat(
       value
@@ -75,8 +75,100 @@ function format_value(value) {
         .replace(/ /g, "")
         .replace("R$", "")
     );
-  else return "R$ " + parseFloat(value).toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+  else
+    return (
+      "R$" +
+      parseFloat(value).toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    );
 }
+
+function brl_to_float(value) {
+  if (!value) return 0;
+  value = value.toString();
+  return parseFloat(
+    value
+      .replace(/\./g, "")
+      .replace(",", ".")
+      .replace(/ /g, "")
+      .replace("R$", "")
+  );
+}
+
+function float_to_brl(value, is_cifrao) {
+  if (!value) return (is_cifrao ? "R$" : "") + "0,00";
+  return (
+    (is_cifrao ? "R$" : "") +
+    value.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  );
+}
+
+function addZero(value) {
+  value = parseInt(value);
+  if (value < 10) return "0" + value;
+  else return value;
+}
+
+function set_url_args(args) {
+  // Construct URLSearchParams object instance from current URL querystring.
+  var queryParams = new URLSearchParams(window.location.search);
+
+  args.forEach((arg) => {
+    queryParams.set(arg.name, arg.value);
+  });
+
+  // Replace current querystring with the new one.
+  history.replaceState(null, null, "?" + queryParams.toString());
+}
+
+function get_location() {
+	return new Promise((res, rej)=>{
+		navigator.geolocation.getCurrentPosition(pos=>{
+			res(pos)
+		},() => rej("Não foi possível pegar a posição do usuário"));
+	})
+}
+
+String.prototype.capitalize = function () {
+  return this.charAt(0).toUpperCase() + this.slice(1);
+};
+
+Date.prototype.getDateString = function () {
+  let month = this.getUTCMonth() + 1; //months from 1-12
+  let day = this.getUTCDate();
+  let year = this.getUTCFullYear();
+  return year + "-" + addZero(month) + "-" + addZero(day);
+};
+
+Date.prototype.getTimeString = function () {
+  return addZero(this.getHours()) + ":" + addZero(this.getMinutes());
+};
+
+Date.prototype.format = function (format) {
+  if (format.includes("Y")) format = format.replace("Y", this.getUTCFullYear());
+  if (format.includes("m"))
+    format = format.replace("m", addZero(this.getUTCMonth() + 1));
+  if (format.includes("d"))
+    format = format.replace("d", addZero(this.getUTCDate()));
+
+  if (format.includes("H"))
+    format = format.replace("H", addZero(this.getHours()));
+  if (format.includes("i"))
+    format = format.replace("i", addZero(this.getMinutes()));
+  if (format.includes("s"))
+    format = format.replace("i", addZero(this.getSeconds()));
+  return format;
+};
+
+Number.prototype.to_brl = function (is_cifrao = true) {
+  return float_to_brl(this, is_cifrao);
+};
+
+String.prototype.to_float = function () {
+  return brl_to_float(this);
+};

@@ -87,12 +87,12 @@ class ConectaBanco
 	 *
 	 * @param string $query
 	 * @param array $args
-   * @return bool|array
+	 * @return bool|array
 	 * @throws Throwable se houver alguma exceção ao executar a consulta
 	 */
-	public function executeQuery(string $query, $args = null)
+	public function executeQuery(string $query, $args = null, bool $unique = false)
 	{
-		if($this->pdo == null){
+		if ($this->pdo == null) {
 			throw new Exception("A conexão com o banco de dados não foi iniciada");
 		}
 		$i = 0;
@@ -103,28 +103,39 @@ class ConectaBanco
 				$i++;
 			}
 		}
+		// echo json_encode([$query,$args]);
+		// echo var_dump([$query,$args]);
 		$this->stmt = $this->pdo->prepare($query);
 		try {
 			// echo $query;
-			// echo var_dump($args);
+			// echo var_dump([$query,$args]);
 			$r = $this->stmt->execute($args);
 			try {
 				$result = $this->stmt->fetchAll();
 			} catch (PDOException $ex) {
-				if($ex->getCode() == 'HY000'){
+				if ($ex->getCode() == 'HY000') {
 					$result = $r;
-				}else{
+				} else {
 					throw $ex;
 				}
 			}
 			if ($result) {
-				return $result;
+				if ($unique && count($result) > 0) return $result[0];
+				else return $result;
 			} else {
 				return $this->stmt->rowCount();
 			}
 		} catch (Throwable $error) {
 			throw $error;
 		}
+	}
+
+	public static function execute(string $query, $args = null, bool $unique = false)
+	{
+		$conexao = new ConectaBanco();
+		$result = $conexao->executeQuery($query, $args, $unique);
+		$conexao;
+		return $result;
 	}
 
 	/**
@@ -154,9 +165,9 @@ class ConectaBanco
 			try {
 				$result = $conexao->stmt->fetchAll();
 			} catch (PDOException $ex) {
-				if($ex->getCode() == 'HY000'){
+				if ($ex->getCode() == 'HY000') {
 					$result = $r;
-				}else{
+				} else {
 					throw $ex;
 				}
 			}

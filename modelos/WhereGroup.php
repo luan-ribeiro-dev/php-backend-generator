@@ -15,7 +15,7 @@ class WhereGroup extends QueryBuilder
   public static function all(){}
   public function getArgs(){}
   public static function select(){}
-  public function del(){}
+  public function del($bool = false){}
   public function get(bool $json = false, bool $single = false, int $limit = null, int $page = 1, bool $appendChilds = true){}
 
 

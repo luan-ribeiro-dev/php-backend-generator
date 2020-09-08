@@ -3,566 +3,747 @@
 namespace DAO;
 
 use Controle\Geral;
+use DateTime;
+use Exception;
 use Throwable;
 
 abstract class QueryBuilder
 {
-  private $table;
-  private $columns;
-  private $selectColumns = [];
-  private $wheres = [];
-  private $notIn = [];
-  /**
-   * @var WhereGroup[] $whereGroups
-   */
-  private $whereGroups = [];
-  protected $args = [];
-  private $joins = [];
-  private $orders = [];
-  private $groups = [];
-  private $limit = null;
-  private $remove_hour = true;
+	private $table;
+	private $columns;
+	private $selectColumns = [];
+	private $wheres = [];
+	private $notIn = [];
+	/**
+	 * @var WhereGroup[] $whereGroups
+	 */
+	private $whereGroups = [];
+	protected $args = [];
+	private $joins = [];
+	private $orders = [];
+	private $groups = [];
+	private $limit = null;
+	private $remove_hour = true;
+	/**
+	 * @var array $config
+	 */
+	private $config = [];
 
-  /**
-   * @var int $last_id
-   */
-  private $last_id;
+	/**
+	 * @var array $childs
+	 */
+	private $childs = [];
 
-  function __construct(string $table, array $columns)
-  {
-    $this->table = $table;
-    $this->columns = $columns;
-  }
+	/**
+	 * @var int $last_id
+	 */
+	private $last_id;
 
-  protected function findObject($id)
-  {
-    $object = null;
-    $query = "select * from " . $this->table . " where id = ?";
-    $conexao = new ConectaBanco();
+	/**
+	 * @var string $last_id
+	 */
+	private $union_query;
 
-    $result = $conexao->executeQuery($query, [$id])[0];
+	/**
+	 * @var array $last_id
+	 */
+	private $union_args;
 
-    $conexao->desconectar();
+	function __construct(string $table, array $columns)
+	{
+		$this->table = $table;
+		$this->columns = $columns;
+	}
 
-    return $result;
-  }
+	protected function findObject($id)
+	{
+		$object = null;
+		$query = "select * from " . $this->table . " where id = ?";
+		$conexao = new ConectaBanco();
 
-  /**
-   * @return QueryBuilder
-   */
-  public function selectColumns(array $selectColumns)
-  {
-    $this->selectColumns = $selectColumns;
-    return $this;
-  }
+		$result = $conexao->executeQuery($query, [$id])[0];
 
-  /**
-   * @return string
-   */
-  private function getColumnsString()
-  {
-    $columnString = "";
-    foreach ($this->selectColumns as $column) {
-      $columnString .= $column . ", ";
-    }
-    if ($columnString != "") {
-      $columnString = substr($columnString, 0, strlen($columnString) - 2);
-    } else {
-      $columnString = $this->table . ".* ";
-    }
-    return $columnString;
-  }
+		$conexao->desconectar();
 
-  /**
-   * @return QueryBuilder
-   */
-  public function where($whereCondition, $arg = null, $type = 'and', $remove_arg = false)
-  {
-    $where = [
-      "condition" => $whereCondition,
-      "type" => $type
-    ];
+		return $result;
+	}
 
-    if(!$remove_arg){
-      $where['arg'] = $arg;
-    }
+	/**
+	 * @return QueryBuilder
+	 */
+	public function selectColumns(array $selectColumns)
+	{
+		$this->selectColumns = $selectColumns;
+		return $this;
+	}
 
-    $this->wheres[] = $where;
-    return $this;
-  }
+	/**
+	 * @return string
+	 */
+	private function getColumnsString()
+	{
+		$columnString = "";
+		foreach ($this->selectColumns as $column) {
+			$columnString .= $column . ", ";
+		}
+		if ($columnString != "") {
+			$columnString = substr($columnString, 0, strlen($columnString) - 2);
+		} else {
+			$columnString = $this->table . ".* ";
+		}
+		return $columnString;
+	}
 
-  public function notIn($column, $select_not, $type = 'and', $arg = null)
-  {
-    $this->notIn[] = [
-      "column" => $column,
-      "select_not" => $select_not,
-      "type" => $type,
-      "arg" => $arg
-    ];
-    return $this;
-  }
+	/**
+	 * @return QueryBuilder
+	 */
+	public function where($whereCondition, $arg = null, $type = 'and', $remove_arg = false)
+	{
+		$where = [
+			"condition" => $whereCondition,
+			"type" => $type
+		];
 
-  /**
-   * Array item = ["condition" => $whereCondition, "arg" => $arg, "type" => $type]
-   * @return QueryBuilder
-   */
-  public function whereGroup(WhereGroup $whereGroup)
-  {
-    $this->whereGroups[] = $whereGroup;
-    return $this;
-  }
+		if (!$remove_arg) {
+			$where['arg'] = $arg;
+		}
 
-  /**
-   * @return string
-   */
-  private function getWheresString()
-  {
-    $whereString = "";
-    foreach ($this->wheres as $where) {
-      if ($whereString == "") {
-        $whereString = "where " . $where['condition'];
-      } else {
-        if ($where['type'] === 'and') {
-          $whereString .= " and ";
-        } else if ($where['type'] === 'or') {
-          $whereString .= " or ";
-        }
-        $whereString .= $where['condition'];
-      }
+		$this->wheres[] = $where;
+		return $this;
+	}
 
-      if(isset($where['arg']))
-        $this->args[] = $where['arg'];
-    }
-    /**
-     * @var WhereGroup $whereGroup
-     */
-    foreach ($this->whereGroups as $whereGroup) {
-      if ($whereString != "") $whereString .= " " . $whereGroup->getType() . " ";
-      else $whereString = "where ";
-      $whereString .= "(";
+	public function notIn($column, $select_not, $type = 'and', $arg = null)
+	{
+		$this->notIn[] = [
+			"column" => $column,
+			"select_not" => $select_not,
+			"type" => $type,
+			"arg" => $arg
+		];
+		return $this;
+	}
 
-      $bool = false;
-      foreach ($whereGroup->getWheres() as $key => $where) {
-        if ($bool && $where['type'] === 'and') {
-          $whereString .= " and ";
-        } else if ($bool && $where['type'] === 'or') {
-          $whereString .= " or ";
-        }
-        $whereString .= $where['condition'];
-        $bool = true;
-        
-        if ($where['arg'] != null)
-        $this->args[] = $where['arg'];
-      }
-      $whereString .= ")";
-    }
-    foreach ($this->notIn as $not) {
-      if ($whereString != "") $whereString .= " " . $not['type'] . " ";
-      else $whereString = "where ";
+	/**
+	 * Array item = ["condition" => $whereCondition, "arg" => $arg, "type" => $type]
+	 * @return QueryBuilder
+	 */
+	public function whereGroup(WhereGroup $whereGroup)
+	{
+		$this->whereGroups[] = $whereGroup;
+		return $this;
+	}
 
-      $whereString .= $not['column'] . " not in (" . $not['select_not'] . ") ";
-      if ($not['arg'] != null)
-        $this->args[] = $not['arg'];
-    }
-    return $whereString;
-  }
+	/**
+	 * @return string
+	 */
+	private function getWheresString()
+	{
+		$whereString = "";
+		foreach ($this->wheres as $where) {
+			if ($whereString == "") {
+				$whereString = "where " . $where['condition'];
+			} else {
+				if ($where['type'] === 'and') {
+					$whereString .= " and ";
+				} else if ($where['type'] === 'or') {
+					$whereString .= " or ";
+				}
+				$whereString .= $where['condition'];
+			}
 
-  /**
-   * @return QueryBuilder
-   */
-  private function join(string $joinTable, string $joinCondition, string $innerType = "inner")
-  {
-    $this->joins[] = [
-      'innerType' => $innerType,
-      'joinTable' => $joinTable,
-      'joinCondition' => $joinCondition,
-    ];
-    return $this;
-  }
+			if (isset($where['arg']))
+				$this->args[] = $where['arg'];
+		}
+		/**
+		 * @var WhereGroup $whereGroup
+		 */
+		foreach ($this->whereGroups as $whereGroup) {
+			if ($whereString != "") $whereString .= " " . $whereGroup->getType() . " ";
+			else $whereString = "where ";
+			$whereString .= "(";
 
-  /**
-   * @return QueryBuilder
-   */
-  public function innerJoin(string $joinTable, string $joinCondition)
-  {
-    $this->join($joinTable, $joinCondition);
-    return $this;
-  }
+			$bool = false;
+			foreach ($whereGroup->getWheres() as $key => $where) {
+				if ($bool && $where['type'] === 'and') {
+					$whereString .= " and ";
+				} else if ($bool && $where['type'] === 'or') {
+					$whereString .= " or ";
+				}
+				$whereString .= $where['condition'];
+				$bool = true;
 
-  /**
-   * @return QueryBuilder
-   */
-  public function leftJoin(string $joinTable, string $joinCondition)
-  {
-    $this->join($joinTable, $joinCondition, "left");
-    return $this;
-  }
+				if ($where['arg'] != null)
+					$this->args[] = $where['arg'];
+			}
+			$whereString .= ")";
+		}
+		foreach ($this->notIn as $not) {
+			if ($whereString != "") $whereString .= " " . $not['type'] . " ";
+			else $whereString = "where ";
 
-  /**
-   * @return QueryBuilder
-   */
-  public function rightJoin(string $joinTable, string $joinCondition)
-  {
-    $this->join($joinTable, $joinCondition, "right");
-    return $this;
-  }
+			$whereString .= $not['column'] . " not in (" . $not['select_not'] . ") ";
+			if ($not['arg'] != null)
+				$this->args[] = $not['arg'];
+		}
+		return $whereString;
+	}
 
-  /**
-   * @return string
-   */
-  private function getJoinsString()
-  {
-    $joinString = "";
-    foreach ($this->joins as $join) {
-      $joinString .= $join['innerType'] . " join " . $join['joinTable'] . " on " . $join['joinCondition'] . " ";
-    }
-    $joinString = substr($joinString, 0, strlen($joinString) - 1);
-    return $joinString;
-  }
+	/**
+	 * @return string
+	 */
+	private function getUnionString()
+	{
+		if ($this->getUnionQuery() == null) return "";
+		else {
+			foreach ($this->getUnionArgs() as $arg) $this->args[] = $arg;
+		}
+		return $this->getUnionQuery();
+	}
 
-  /**
-   * @return QueryBuilder
-   */
-  public function orderBy(string $orderColumn, string $sortType = "asc")
-  {
-    $this->orders[] = [
-      "orderColumn" => $orderColumn,
-      "sortType" => $sortType
-    ];
-    return $this;
-  }
+	/**
+	 * @return QueryBuilder
+	 */
+	private function join(string $joinTable, string $joinCondition, string $innerType = "inner")
+	{
+		$this->joins[] = [
+			'innerType' => $innerType,
+			'joinTable' => $joinTable,
+			'joinCondition' => $joinCondition,
+		];
+		return $this;
+	}
 
-  /**
-   * @return string
-   */
-  private function getOrdersString()
-  {
-    $orderString = "";
-    foreach ($this->orders as $order) {
-      if ($orderString == "") {
-        $orderString = "order by " . $order['orderColumn'] . " " . $order['sortType'] . ", ";
-      } else {
-        $orderString .= $order['orderColumn'] . " " . $order['sortType'] . ", ";
-      }
-    }
-    if ($orderString != "") {
-      $orderString = substr($orderString, 0, strlen($orderString) - 2);
-    }
-    return $orderString;
-  }
+	/**
+	 * @return QueryBuilder
+	 */
+	public function innerJoin(string $joinTable, string $joinCondition)
+	{
+		$this->join($joinTable, $joinCondition);
+		return $this;
+	}
 
-  /**
-   * @return QueryBuilder
-   */
-  public function groupBy(string $group)
-  {
-    $this->groups[] = $group;
-    return $this;
-  }
+	/**
+	 * @return QueryBuilder
+	 */
+	public function leftJoin(string $joinTable, string $joinCondition)
+	{
+		$this->join($joinTable, $joinCondition, "left");
+		return $this;
+	}
 
-  /**
-   * @return string
-   */
-  private function getGroupsString()
-  {
-    $groupsString = "";
-    foreach ($this->groups as $group) {
-      if ($groupsString == "") {
-        $groupsString = "group by " . $group . ", ";
-      } else {
-        $groupsString .= $group . ", ";
-      }
-    }
-    if ($groupsString != "") {
-      $groupsString = substr($groupsString, 0, strlen($groupsString));
-    }
-    return $groupsString;
-  }
+	/**
+	 * @return QueryBuilder
+	 */
+	public function rightJoin(string $joinTable, string $joinCondition)
+	{
+		$this->join($joinTable, $joinCondition, "right");
+		return $this;
+	}
 
-  /**
-   * @return QueryBuilder
-   */
-  public function limit(int $limit = null)
-  {
-    $this->limit = $limit;
-    return $this;
-  }
+	/**
+	 * @return string
+	 */
+	private function getJoinsString()
+	{
+		$joinString = "";
+		foreach ($this->joins as $join) {
+			$joinString .= $join['innerType'] . " join " . $join['joinTable'] . " on " . $join['joinCondition'] . " ";
+		}
+		$joinString = substr($joinString, 0, strlen($joinString) - 1);
+		return $joinString;
+	}
 
-  /**
-   * @return string
-   */
-  private function getLimitString(int $page = null)
-  {
-    if ($page != null && $this->limit != null) {
-      $limit = "limit ";
-      $limit .= (($this->limit * $page) - $this->limit) . ", " . ($this->limit);
-      return $limit;
-    } else {
-      return "";
-    }
-  }
+	/**
+	 * @return QueryBuilder
+	 */
+	public function orderBy(string $orderColumn, string $sortType = "asc")
+	{
+		$this->orders[] = [
+			"orderColumn" => $orderColumn,
+			"sortType" => $sortType
+		];
+		return $this;
+	}
 
-  /**
-   * @return array
-   */
-  public function getObjects(int $page = null)
-  {
-    $query = "select " . $this->getColumnsString()
-      . " from " . $this->table . " "
-      . $this->getJoinsString() . " "
-      . $this->getWheresString() . " "
-      . $this->getOrdersString() . " "
-      . $this->getGroupsString() . " "
-      . $this->getLimitString($page) . " ";
-    // echo var_dump([$query, $this->args]);
-    // echo json_encode([$query, $this->args]);
-    try {
-      $conexao = new ConectaBanco();
-      $result = $conexao->executeQuery($query, $this->args);
-      return $result;
-    } catch (\Throwable $th) {
-      throw $th;
-    } finally {
-      $conexao->desconectar();
-    }
-  }
+	/**
+	 * @return string
+	 */
+	private function getOrdersString()
+	{
+		$orderString = "";
+		foreach ($this->orders as $order) {
+			if ($orderString == "") {
+				$orderString = "order by " . $order['orderColumn'] . " " . $order['sortType'] . ", ";
+			} else {
+				$orderString .= $order['orderColumn'] . " " . $order['sortType'] . ", ";
+			}
+		}
+		if ($orderString != "") {
+			$orderString = substr($orderString, 0, strlen($orderString) - 2);
+		}
+		return $orderString;
+	}
 
-  public function count($column = null)
-  {
-    if($column == null) $column = $this->table.".id";
+	/**
+	 * @return QueryBuilder
+	 */
+	public function groupBy(string $group)
+	{
+		$this->groups[] = $group;
+		return $this;
+	}
 
-    $query = "select count(".$column.") as quantity from " . $this->table . " "
-      . $this->getJoinsString() . " "
-      . $this->getWheresString() . " "
-      . $this->getOrdersString() . " "
-      . $this->getGroupsString();
-    try {
-      $conexao = new ConectaBanco();
-      // echo json_encode([$query, $this->args]);
-      echo var_dump([$query, $this->args]);
-      $result = $conexao->executeQuery($query, $this->args)[0];
-      return $result['quantity'];
-    } catch (\Throwable $th) {
-      throw $th;
-    } finally {
-      $conexao->desconectar();
-    }
-  }
+	/**
+	 * @return string
+	 */
+	private function getGroupsString()
+	{
+		$groupsString = "";
+		foreach ($this->groups as $group) {
+			if ($groupsString == "") {
+				$groupsString = "group by " . $group . ", ";
+			} else {
+				$groupsString .= $group . ", ";
+			}
+		}
+		if ($groupsString != "") {
+			$groupsString = substr($groupsString, 0, strlen($groupsString));
+		}
+		return $groupsString;
+	}
 
-  /**
-   * @return bool
-   */
-  public abstract function save();
+	/**
+	 * @return QueryBuilder
+	 */
+	public function limit(int $limit = null)
+	{
+		$this->limit = $limit;
+		return $this;
+	}
 
-  /**
-   * @var string
-   */
-  private function getInsertString()
-  {
-    $query = "insert into " . $this->table . "(";
-    $s = "(";
-    foreach ($this->columns as $column) {
-      $query .= $column . ", ";
-      $s .= "?, ";
-    }
-    $query = substr($query, 0, strlen($query) - 2) . ")";
-    $s = substr($s, 0, strlen($s) - 2) . ")";
-    $query .= " values" . $s;
-    return $query;
-  }
+	/**
+	 * @return string
+	 */
+	private function getLimitString(int $page = null)
+	{
+		if ($page != null && $this->limit != null) {
+			$limit = "limit ";
+			$limit .= (($this->limit * $page) - $this->limit) . ", " . ($this->limit);
+			return $limit;
+		} else {
+			return "";
+		}
+	}
 
-  /**
-   * @return bool
-   */
-  public function create()
-  {
-    try {
-      $conexao = new ConectaBanco();
-      // echo var_dump($this->getInsertString());
-      // echo var_dump($this->getArgs());
-      $result = $conexao->executeQuery($this->getInsertString(), $this->getArgs());
-      // echo var_dump($result);
-      // echo var_dump($result);
-      if ($result) {
-        $this->setLastId($conexao->getLastInsertedID());
-      }
-      return $result;
-    } catch (Throwable $error) {
-      // echo var_dump($error);
-      $conexao->desconectar();
-      throw $error;
-    } finally {
-      $conexao->desconectar();
-    }
-  }
+	/**
+	 * @return array
+	 */
+	public function getObjects(int $page = null)
+	{
+		$this->args = [];
+		$from = ($this->getUnionQuery() == null) ? $this->table : $this->getUnionString();
+		$query = "select " . $this->getColumnsString()
+			. " from " . $from . " "
+			. $this->getJoinsString() . " "
+			. $this->getWheresString() . " "
+			. $this->getOrdersString() . " "
+			. $this->getGroupsString() . " "
+			. $this->getLimitString($page) . " ";
+		// echo var_dump([$query, $this->args]);
+		// echo json_encode([$query, $this->args]);
+		try {
+			$conexao = new ConectaBanco();
+			$result = $conexao->executeQuery($query, $this->args);
+			return $result;
+		} catch (\Throwable $th) {
+			if (DEBUG) throw $th;
+			else throw new Exception("Ocorreu um com o banco de dados");
+		} finally {
+			$conexao->desconectar();
+		}
+	}
 
-  /**
-   * @var string
-   */
-  private function getUpdateString()
-  {
-    $query = "update " . $this->table . " set ";
-    foreach ($this->columns as $column) {
-      $query .= $column . " = ?, ";
-    }
-    $query = substr($query, 0, strlen($query) - 2);
-    $query .= " where id = ?";
-    return $query;
-  }
+	private function common_function(string $function_name, $column = null)
+	{
+		$this->args = [];
+		if ($column == null) $column = $this->table . ".id";
 
-  /**
-   * @return bool
-   */
-  public function update()
-  {
-    try {
-      $conexao = new ConectaBanco();
-      $args = $this->getArgs();
-      $args[] = $args[0];
-      // echo json_encode([$this->getUpdateString(), $args]);
-      $result = $conexao->executeQuery($this->getUpdateString(), $args);
-      return $result;
-    } catch (Throwable $error) {
-      return $error;
-    } finally {
-      $conexao->desconectar();
-    }
-  }
+		$from = ($this->getUnionQuery() == null) ? $this->table : $this->getUnionString();
+		$query = "select " . $function_name . "(" . $column . ") as value from " . $from . " "
+			. $this->getJoinsString() . " "
+			. $this->getWheresString() . " "
+			. $this->getOrdersString() . " "
+			. $this->getGroupsString();
+		try {
+			$conexao = new ConectaBanco();
+			// echo json_encode([$query, $this->args]);
+			// echo var_dump([$query, $this->args]);
+			$result = $conexao->executeQuery($query, $this->args)[0];
+			return $result['value'];
+		} catch (\Throwable $th) {
+			if (DEBUG) throw $th;
+			else throw new Exception("Ocorreu um com o banco de dados");
+		} finally {
+			$conexao->desconectar();
+		}
+	}
 
-  /**
-   * @var string
-   */
-  private function getDeleteString()
-  {
-    $query = "delete from " . $this->table . " where id = ?";
-    return $query;
-  }
+	public function count($column = null)
+	{
+		return $this->common_function('count', $column);
+	}
 
-  /**
-   * @return bool
-   */
-  public function delete()
-  {
-    try {
-      $conexao = new ConectaBanco();
-      // echo json_encode([$this->getDeleteString(), [$this->getArgs()[0]]]);
-      $result = $conexao->executeQuery($this->getDeleteString(), [$this->getArgs()[0]]);
-      return $result;
-    } catch (Throwable $error) {
-      return $error;
-    } finally {
-      $conexao->desconectar();
-    }
-  }
+	public function sum($column = null)
+	{
+		return $this->common_function('sum', $column);
+	}
 
-  /**
-   * @return bool
-   */
-  public function deleteWithProcedure($procedureName)
-  {
-    try {
-      $conexao = new ConectaBanco();
-      $result = $conexao->executeQuery("call " . $procedureName . "(?)", [$this->getArgs()[0]]);
-      return $result;
-    } catch (Throwable $error) {
-      return $error;
-    } finally {
-      $conexao->desconectar();
-    }
-  }
+	public function avg($column = null)
+	{
+		return $this->common_function('avg', $column);
+	}
 
-  /**
-   * Get $last_id
-   *
-   * @return int
-   */
-  public function getLastId()
-  {
-    return $this->last_id;
-  }
+	public function union(string $union_query, array $union_args = null)
+	{
+		$this->union_query = $union_query;
+		$this->union_args = $union_args;
+	}
 
-  /**
-   * Set $last_id
-   *
-   * @param int $last_id  $last_id
-   *
-   * @return self
-   */
-  public function setLastId(int $last_id)
-  {
-    $this->last_id = $last_id;
+	/**
+	 * @return bool
+	 */
+	public abstract function save();
 
-    return $this;
-  }
+	/**
+	 * @var string
+	 */
+	private function getInsertString()
+	{
+		$query = "insert into " . $this->table . "(";
+		$s = "(";
+		foreach ($this->columns as $column) {
+			$query .= $column . ", ";
+			$s .= "?, ";
+		}
+		$query = substr($query, 0, strlen($query) - 2) . ")";
+		$s = substr($s, 0, strlen($s) - 2) . ")";
+		$query .= " values" . $s;
+		return $query;
+	}
 
-  /**
-   * @return array
-   */
-  public abstract static function all();
+	/**
+	 * @return bool
+	 */
+	public function create()
+	{
+		try {
+			$conexao = new ConectaBanco();
+			$date = new DateTime();
+			$args = $this->getArgs();
+			$args[count($args) - 1] = $date->format("Y-m-d H:i:s");
+			// throw new Exception(json_encode([$this->getInsertString(), $args]));
+			$result = $conexao->executeQuery($this->getInsertString(), $args);
+			if ($result) {
+				$this->setLastId($conexao->getLastInsertedID());
+			}
+			return $result;
+		} catch (Throwable $error) {
+			// echo var_dump($error);
+			$conexao->desconectar();
+			throw $error;
+		} finally {
+			$conexao->desconectar();
+		}
+	}
 
-  /**
-   * @return array
-   */
-  public abstract function getArgs();
+	/**
+	 * @var string
+	 */
+	private function getUpdateString()
+	{
+		$query = "update " . $this->table . " set ";
+		foreach ($this->columns as $column) {
+			$query .= $column . " = ?, ";
+		}
+		$query = substr($query, 0, strlen($query) - 2);
+		$query .= " where id = ?";
+		return $query;
+	}
 
-  /**
-   * @return self
-   */
-  public abstract static function select();
+	/**
+	 * @return bool
+	 */
+	public function update()
+	{
+		try {
+			$conexao = new ConectaBanco();
+			$args = $this->getArgs();
+			$args[] = $args[0];
+			// echo json_encode([$this->getUpdateString(), $args]);
+			$result = $conexao->executeQuery($this->getUpdateString(), $args);
+			return $result;
+		} catch (Throwable $error) {
+			return $error;
+		} finally {
+			$conexao->desconectar();
+		}
+	}
 
-  /**
-   * @return bool
-   */
-  public abstract function del($bool = false);
+	/**
+	 * @var string
+	 */
+	private function getDeleteString()
+	{
+		$query = "delete from " . $this->table . " where id = ?";
+		return $query;
+	}
 
-  /**
-   * Busca objetos de acordo com as querys de busca
-   *
-   * @param bool $json Se o retorno vai ser um json|array
-   * @param bool $single Se o retorno vai ser apenas um registro
-   * @param int $limit Se a busca vai ter limite
-   * @param int $page Caso a busca tenha um limite, esse parametro vai trazer as proximas posições desse limite
-   * @return self|self[]|array
-   */
-  public abstract function get(bool $json = false, bool $single = false, int $limit = null, int $page = 1, bool $appendChilds = true);
+	/**
+	 * @return bool
+	 */
+	public function delete()
+	{
+		try {
+			$conexao = new ConectaBanco();
+			// echo json_encode([$this->getDeleteString(), [$this->getArgs()[0]]]);
+			$result = $conexao->executeQuery($this->getDeleteString(), [$this->getArgs()[0]]);
+			return $result;
+		} catch (Throwable $error) {
+			return $error;
+		} finally {
+			$conexao->desconectar();
+		}
+	}
 
-  /**
-   * Get the value of wheres
-   */
-  public function getWheres()
-  {
-    return $this->wheres;
-  }
+	/**
+	 * @return bool
+	 */
+	public function deleteWithProcedure($procedureName)
+	{
+		try {
+			$conexao = new ConectaBanco();
+			$result = $conexao->executeQuery("call " . $procedureName . "(?)", [$this->getArgs()[0]]);
+			return $result;
+		} catch (Throwable $error) {
+			return $error;
+		} finally {
+			$conexao->desconectar();
+		}
+	}
 
-  /**
-   * Set the value of wheres
-   *
-   * @return self
-   */
-  public function setWheres($wheres)
-  {
-    $this->wheres = $wheres;
+	/**
+	 * @return bool
+	 */
+	public function config($post_data)
+	{
+		if (isset($post_data['childs']) && $post_data['childs'] != null) $this->setChilds($post_data['childs']);
+		if (isset($post_data['columns']) && $post_data['columns'] != null) $this->selectColumns($post_data['columns']);
+		if (isset($post_data['config']) && $post_data['config'] != null) $this->setConfig($post_data['config']);
+	}
 
-    return $this;
-  }
+	/**
+	 * Get $last_id
+	 *
+	 * @return int
+	 */
+	public function getLastId()
+	{
+		return $this->last_id;
+	}
 
-  /**
-   * Get the value of remove_hour
-   */ 
-  public function getRemoveHour()
-  {
-    return $this->remove_hour;
-  }
+	/**
+	 * Set $last_id
+	 *
+	 * @param int $last_id  $last_id
+	 *
+	 * @return self
+	 */
+	public function setLastId(int $last_id)
+	{
+		$this->last_id = $last_id;
 
-  /**
-   * Set the value of remove_hour
-   *
-   * @return self
-   */ 
-  public function setRemoveHour($remove_hour)
-  {
-    $this->remove_hour = $remove_hour;
+		return $this;
+	}
 
-    return $this;
-  }
+	/**
+	 * @return array
+	 */
+	public abstract static function all();
+
+	/**
+	 * @return array
+	 */
+	public abstract function getArgs();
+
+	/**
+	 * @return self
+	 */
+	public abstract static function select();
+
+	/**
+	 * @return bool
+	 */
+	public abstract function del($bool = false);
+
+	/**
+	 * @return self
+	 */
+	public function attachChilds()
+	{
+	}
+
+	/**
+	 * Busca objetos de acordo com as querys de busca
+	 *
+	 * @param bool $json Se o retorno vai ser um json|array
+	 * @param bool $single Se o retorno vai ser apenas um registro
+	 * @param int $limit Se a busca vai ter limite
+	 * @param int $page Caso a busca tenha um limite, esse parametro vai trazer as proximas posições desse limite
+	 * @return self|self[]|array
+	 */
+	public abstract function get(bool $json = false, bool $single = false, int $limit = null, int $page = 1, bool $appendChilds = true);
+
+	/**
+	 * Get the value of wheres
+	 */
+	public function getWheres()
+	{
+		return $this->wheres;
+	}
+
+	/**
+	 * Set the value of wheres
+	 *
+	 * @return self
+	 */
+	public function setWheres($wheres)
+	{
+		$this->wheres = $wheres;
+
+		return $this;
+	}
+
+	/**
+	 * Get the value of remove_hour
+	 */
+	public function getRemoveHour()
+	{
+		return $this->remove_hour;
+	}
+
+	/**
+	 * Set the value of remove_hour
+	 *
+	 * @return self
+	 */
+	public function setRemoveHour($remove_hour)
+	{
+		$this->remove_hour = $remove_hour;
+
+		return $this;
+	}
+
+	/**
+	 * Get $config
+	 *
+	 * @return array
+	 */
+	public function getConfig()
+	{
+		return $this->config;
+	}
+
+	/**
+	 * Set $config
+	 *
+	 * @param array $config  $config
+	 *
+	 * @return self
+	 */
+	public function setConfig(array $config)
+	{
+		$this->config = $config;
+
+		return $this;
+	}
+
+	/**
+	 * Get $childs
+	 *
+	 * @return array
+	 */
+	public function getChilds()
+	{
+		return $this->childs;
+	}
+
+	/**
+	 * Set $childs
+	 *
+	 * @param array $childs  $childs
+	 *
+	 * @return self
+	 */
+	public function setChilds(array $childs)
+	{
+		$this->childs = $childs;
+
+		return $this;
+	}
+
+	/**
+	 * Get $last_id
+	 *
+	 * @return string
+	 */
+	public function getUnionQuery()
+	{
+		return $this->union_query;
+	}
+
+	/**
+	 * Set $last_id
+	 *
+	 * @param string $union_query  $last_id
+	 *
+	 * @return self
+	 */
+	public function setUnionQuery(string $union_query)
+	{
+		$this->union_query = $union_query;
+
+		return $this;
+	}
+
+	/**
+	 * Get $last_id
+	 *
+	 * @return array
+	 */
+	public function getUnionArgs()
+	{
+		return $this->union_args;
+	}
+
+	/**
+	 * Set $last_id
+	 *
+	 * @param array $union_args  $last_id
+	 *
+	 * @return self
+	 */
+	public function setUnionArgs(array $union_args)
+	{
+		$this->union_args = $union_args;
+
+		return $this;
+	}
+
+	/**
+	 * Get the value of columns
+	 */
+	public function getColumns()
+	{
+		return $this->columns;
+	}
 }
