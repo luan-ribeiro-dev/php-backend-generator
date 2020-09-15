@@ -120,6 +120,20 @@ class ControleOfControls
           $class .= "		}\n\n";
         }
 
+        if (in_array("cnpj", $validation)) {
+          $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != null) {\n";
+          $class .= "		  if (!Geral::validar_cnpj(\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "())) {\n";
+          $class .= "				\$errors['" . $key . "'][] = \"CNPJ inválido\";\n";
+          $class .= "		  }\n";
+          $class .= "		}\n\n";
+        }
+
+        if (in_array("cep", $validation)) {
+          $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != null && strlen(\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "()) < 9) {\n";
+          $class .= "			\$errors['" . $key . "'][] = \"CEP no formato inválido\";\n";
+          $class .= "		}\n\n";
+        }
+
         if (in_array("telefone", $validation)) {
           $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != null) {\n";
           $class .= "		  if (!Geral::validar_numero_celular(\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "())) {\n";
