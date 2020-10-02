@@ -101,6 +101,12 @@ class ControleOfControls
           $class .= "			\$errors['" . $key . "'][] = \"O " . Controle::getSeparateName($key) . " do " . $lowerName . " é nulo\";\n";
           $class .= "		}\n\n";
         }
+				
+				if (in_array("not negative", $validation)) {
+          $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() < 0) {\n";
+          $class .= "			\$errors['" . $key . "'][] = \"A quantidade de " . Controle::getSeparateName($key) . " do " . $lowerName . " não pode ser negativo\";\n";
+          $class .= "		}\n\n";
+        }
 
         if (in_array("unique", $validation)) {
           $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != null || \$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != \"\") {\n";
@@ -114,7 +120,7 @@ class ControleOfControls
 
         if (in_array("cpf", $validation)) {
           $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != null) {\n";
-          $class .= "		  if (!Geral::validar_cpf(\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "())) {\n";
+          $class .= "		  if (!validar_cpf(\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "())) {\n";
           $class .= "				\$errors['" . $key . "'][] = \"CPF inválido\";\n";
           $class .= "		  }\n";
           $class .= "		}\n\n";
@@ -122,7 +128,7 @@ class ControleOfControls
 
         if (in_array("cnpj", $validation)) {
           $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != null) {\n";
-          $class .= "		  if (!Geral::validar_cnpj(\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "())) {\n";
+          $class .= "		  if (!validar_cnpj(\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "())) {\n";
           $class .= "				\$errors['" . $key . "'][] = \"CNPJ inválido\";\n";
           $class .= "		  }\n";
           $class .= "		}\n\n";
@@ -136,7 +142,7 @@ class ControleOfControls
 
         if (in_array("telefone", $validation)) {
           $class .= "		if (\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "() != null) {\n";
-          $class .= "		  if (!Geral::validar_numero_celular(\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "())) {\n";
+          $class .= "		  if (!validar_numero_celular(\$" . $lowerName . "->get" . Controle::getCapitalizedName($key) . "())) {\n";
           $class .= "				\$errors['" . $key . "'][] = \"Número de telefone inválido\";\n";
           $class .= "		  }\n";
           $class .= "		}\n\n";
@@ -212,7 +218,7 @@ class ControleOfControls
     $class .= "	public static function update(\\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . " \$" . $lowerName . ")\n";
     $class .= "	{\n";
     $class .= "		if (" . Controle::getCapitalizedName($json_object['nome']) . "::validate(\$" . $lowerName . ")) {\n";
-    $class .= "			\$old" . Controle::getCapitalizedName($json_object['nome']) . " = \\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . "::find(\$" . $lowerName . "->getId(), true);\n";
+    $class .= "			\$old" . Controle::getCapitalizedName($json_object['nome']) . " = \\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . "::select()->where('id = ?', \$" . $lowerName . "->getId())->get(true, true);\n";
     $class .= "			\$" . $lowerName . "_json = \\Modelo\\" . Controle::getCapitalizedName($json_object['nome']) . "::getJson(\$" . $lowerName . ");\n";
     $class .= "			if (\n				";
     foreach (array_filter($json_object['atributos'], function ($atributo) {

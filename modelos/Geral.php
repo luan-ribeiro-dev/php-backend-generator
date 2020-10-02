@@ -238,14 +238,7 @@ class Geral
 
 	public static function getDayValue($day_name)
 	{
-		if ($day_name == 'seg') return 1;
-		else if ($day_name == 'ter') return 2;
-		else if ($day_name == 'qua') return 3;
-		else if ($day_name == 'qui') return 4;
-		else if ($day_name == 'sex') return 5;
-		else if ($day_name == 'sab') return 6;
-		else if ($day_name == 'dom') return 7;
-		else return null;
+		return null;
 	}
 
 	public static function getFileExtension($file_name)
