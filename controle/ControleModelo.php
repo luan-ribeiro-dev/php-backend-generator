@@ -219,7 +219,7 @@ class ControleModelo
 		$class .= "	 * @param bool \$single Se o retorno vai ser apenas um registro\n";
 		$class .= "	 * @param int \$limit Se a busca vai ter limite\n";
 		$class .= "	 * @param int \$page Caso a busca tenha um limite, esse parametro vai trazer as proximas posições desse limite\n";
-		$class .= "	 * @return " . Controle::getCapitalizedName($json_object['nome']) . "[]|array\n";
+		$class .= "	 * @return " . Controle::getCapitalizedName($json_object['nome']) . "|" . Controle::getCapitalizedName($json_object['nome']) . "[]|array\n";
 		$class .= "	 */\n";
 		$class .= "	public function get(bool \$json = false, bool \$single = false, int \$page = 1)\n";
 		$class .= "	{\n";
@@ -388,6 +388,13 @@ class ControleModelo
 
 		// generic attachs
 		foreach ($objetos_dependentes as $atributo) {
+			if (isset($atributo['link']['id_assoc']))
+				$id = $atributo['link']['id_assoc'];
+			else
+				$id = "id_" . $atributo['link']['nome_atributo'];
+			$object = array_filter(ControleModelo::getJsonModels(), function ($object) use ($atributo) {
+				return $object['nome'] == $atributo['link']['nome'];
+			});
 			if ($atributo['link']['tipo'] == "objeto") {
 				$nomeObjeto = Controle::getCapitalizedName(substr($atributo['nome'], 3));
 				$nomeAtributo = Controle::getCapitalizedName($atributo['nome']);
@@ -395,7 +402,7 @@ class ControleModelo
 				$class .= "	 * Conecta ao objeto $nomeObjeto\n";
 				$class .= "	 * @return $nomeObjeto\n";
 				$class .= "	 */\n";
-				$class .= "	public function attach$nomeObjeto(array \$columns = ['*'])\n";
+				$class .= "	public function attach$nomeObjeto(array \$columns = ['" . $atributo['link']['nome_atributo'] . "*'])\n";
 				$class .= "	{\n";
 				$class .= "		if(\$this->get$nomeAtributo() == null) throw new Exception('Não foi possível conectar ao objeto $nomeObjeto pois os atributo " . $atributo['nome'] . " é nulo');\n";
 				$class .= "		\$" . $atributo['link']['nome_atributo'] . " = " . $atributo['link']['nome'] . "::select()\n";
@@ -405,28 +412,28 @@ class ControleModelo
 				$class .= "		\$this->set$nomeObjeto(\$" . $atributo['link']['nome_atributo'] . ");\n";
 				$class .= "		return \$this->get$nomeObjeto();\n";
 				$class .= "	}\n\n";
-				
+
 				//JSON
 				$class .= "	/**\n";
 				$class .= "	 * Conecta ao objeto $nomeObjeto\n";
 				$class .= "	 * @return $nomeObjeto\n";
 				$class .= "	 */\n";
-				$class .= "	public static function attach".$nomeObjeto."Json(array &\$$lowerName, array \$columns = ['*'])\n";
+				$class .= "	public static function attach" . $nomeObjeto . "Json(array &\$$lowerName, array \$columns = ['" . $atributo['link']['nome_atributo'] . "*'])\n";
 				$class .= "	{\n";
-				$class .= "		if(!isset(\$".$lowerName."['".$atributo['nome']."']) || \$".$lowerName."['".$atributo['nome']."'] == null) throw new Exception('Não foi possível conectar ao objeto $nomeObjeto pois os atributo " . $atributo['nome'] . " é nulo');\n";
+				$class .= "		if(!isset(\$" . $lowerName . "['" . $atributo['nome'] . "']) || \$" . $lowerName . "['" . $atributo['nome'] . "'] == null) throw new Exception('Não foi possível conectar ao objeto $nomeObjeto pois os atributo " . $atributo['nome'] . " é nulo');\n";
 				$class .= "		\$" . $atributo['link']['nome_atributo'] . " = " . $atributo['link']['nome'] . "::select()\n";
 				$class .= "		  ->columns(\$columns)\n";
-				$class .= "		  ->where('id = ?', \$".$lowerName."['".$atributo['nome']."'])\n";
+				$class .= "		  ->where('id = ?', \$" . $lowerName . "['" . $atributo['nome'] . "'])\n";
 				$class .= "		  ->get(true, true);\n";
-				$class .= "		\$".$lowerName."['" . $atributo['link']['nome_atributo'] . "'] = \$" . $atributo['link']['nome_atributo'] . ";\n";
+				$class .= "		\$" . $lowerName . "['" . $atributo['link']['nome_atributo'] . "'] = \$" . $atributo['link']['nome_atributo'] . ";\n";
 				$class .= "	}\n\n";
 			} else if ($atributo['link']['tipo'] == "lista") {
 				$nomeAtributo = Controle::getCapitalizedName($atributo['nome']);
 				$class .= "	/**\n";
 				$class .= "	 * Conecta ao objeto $nomeAtributo\n";
-				$class .= "	 * @return $nomeAtributo\n";
+				$class .= "	 * @return " . $atributo['link']['nome'] . "[]\n";
 				$class .= "	 */\n";
-				$class .= "	public function attach$nomeAtributo(array \$columns = ['*'])\n";
+				$class .= "	public function attach$nomeAtributo(array \$columns = ['" . $atributo['link']['nome_atributo'] . "*'])\n";
 				$class .= "	{\n";
 				$class .= "		if(\$this->getId() == null) throw new Exception('Não foi possível conectar ao objeto $nomeAtributo pois os atributo id é nulo');\n";
 				$class .= "		\$" . $atributo['link']['nome_atributo'] . " = " . $atributo['link']['nome'] . "::select()\n";
@@ -437,21 +444,20 @@ class ControleModelo
 				$class .= "		\$this->set$nomeAtributo(\$" . $atributo['link']['nome_atributo'] . ");\n";
 				$class .= "		return \$this->get$nomeAtributo();\n";
 				$class .= "	}\n\n";
-				
+
 				//JSON
 				$class .= "	/**\n";
 				$class .= "	 * Conecta ao objeto $nomeAtributo\n";
-				$class .= "	 * @return $nomeAtributo\n";
 				$class .= "	 */\n";
-				$class .= "	public static function attach".$nomeAtributo."Json(array &\$$lowerName, array \$columns = ['*'])\n";
+				$class .= "	public static function attach" . $nomeAtributo . "Json(array &\$$lowerName, array \$columns = ['" . $atributo['link']['nome_atributo'] . ".*'])\n";
 				$class .= "	{\n";
-				$class .= "		if(!isset(\$".$lowerName."['id']) || \$".$lowerName."['id'] == null) throw new Exception('Não foi possível conectar ao objeto $nomeAtributo pois os atributo " . $atributo['nome'] . " é nulo');\n";
-				$class .= "		\$" . $atributo['link']['nome_atributo'] . " = " . $atributo['link']['nome'] . "::select()\n";
+				$class .= "		if(!isset(\$" . $lowerName . "['id']) || \$" . $lowerName . "['id'] == null) throw new Exception('Não foi possível conectar ao objeto $nomeAtributo pois os atributo " . $atributo['nome'] . " é nulo');\n";
+				$class .= "		\$" . $atributo['nome'] . " = " . $atributo['link']['nome'] . "::select()\n";
 				$class .= "		  ->columns(\$columns)\n";
 				$class .= "		  ->innerJoin('" . $atributo['link']['tabela_associativa'] . "', '" . $atributo['link']['tabela_associativa'] . "." . $id . " = " . $object['nome_tabela'] . ".id')\n";
 				$class .= "		  ->where('" . $atributo['link']['tabela_associativa'] . ".id_" . $lowerName . " = ?', \$" . $lowerName . "['id'])\n";
 				$class .= "		  ->get(true);\n";
-				$class .= "		\$".$lowerName."['" . $atributo['link']['nome_atributo'] . "'] = \$" . $atributo['link']['nome_atributo'] . ";\n";
+				$class .= "		\$" . $lowerName . "['" . $atributo['nome'] . "'] = \$" . $atributo['nome'] . ";\n";
 				$class .= "	}\n\n";
 			}
 		}
@@ -574,7 +580,7 @@ class ControleModelo
 		$class .= "	 *\n";
 		$class .= "	 * @return " . Controle::getCapitalizedName($json_object['nome']) . "\n";
 		$class .= "	 */\n";
-		$class .= "	public static function getPostObject(array \$post_data, int \$id = null, bool \$remove_object = true)\n";
+		$class .= "	public static function getPostObject(array \$post_data, int \$id = null, array \$remove_object = [])\n";
 		$class .= "	{\n";
 		$class .= "		/**\n";
 		$class .= "		 * @var " . Controle::getCapitalizedName($json_object['nome']) . " $" . $lowerName . "\n";
@@ -605,7 +611,7 @@ class ControleModelo
 				$class .= "		}\n";
 			} else if ($atributo['tipo'] == 'int') {
 				if (isset($atributo['link'])) {
-					$class .= "\n		if(\$remove_object){\n";
+					$class .= "\n		if(in_array('" . $atributo['nome'] . "', array_values(\$remove_object))){\n";
 					$class .= "		  if (isset(\$post_data['" . $atributo['nome'] . "']) && \$post_data['" . $atributo['nome'] . "'] != null) \$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(intval(\$post_data['" . $atributo['nome'] . "']));\n";
 					$class .= "		  else \$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(null);\n";
 					$class .= "		}";
@@ -615,7 +621,7 @@ class ControleModelo
 			} else if ($atributo['tipo'] == "objeto_assoc") {
 				$class .= "\n		if (isset(\$post_data['" . $atributo['nome'] . "'])) \$" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['nome']) . "(" . Controle::getCapitalizedName($atributo['nome']) . "::getObject(\$post_data['" . $atributo['nome'] . "']));\n";
 			} else if (isset($atributo['link']) && $atributo['link']['tipo'] == "lista") {
-				$class .= "\n		if(\$remove_object){\n";
+				$class .= "\n		if(in_array('" . $atributo['nome'] . "', array_values(\$remove_object))){\n";
 				$class .= " 		  if (isset(\$post_data['" . $atributo['nome'] . "'])){\n";
 				$class .= " 		  	$" . $atributo['nome'] . " = [];\n";
 				$class .= " 		  	foreach(json_decode(\$post_data['" . $atributo['nome'] . "'], true) as \$object) $" . $atributo['nome'] . "[] = " . Controle::getCapitalizedName($atributo['link']['nome']) . "::getObject(\$object);\n";
@@ -839,7 +845,7 @@ class ControleModelo
 		$bigName = Controle::getCapitalizedName($json_object['nome_tabela']);
 		$class .= "\n";
 		$class .= "	// Query Build returns Start\n\n";
-		
+
 		$class .= "	/**\n";
 		$class .= "	 * @return $bigName\n";
 		$class .= "	 */\n";
@@ -847,7 +853,7 @@ class ControleModelo
 		$class .= "		parent::columns(\$select_columns);\n";
 		$class .= "		return \$this;\n";
 		$class .= "	}\n\n";
-		
+
 		$class .= "	/**\n";
 		$class .= "	 * @return $bigName\n";
 		$class .= "	 */\n";
@@ -855,7 +861,15 @@ class ControleModelo
 		$class .= "		parent::where(\$whereCondition, \$arg, \$type, \$remove_arg);\n";
 		$class .= "		return \$this;\n";
 		$class .= "	}\n\n";
-		
+
+		$class .= "	/**\n";
+		$class .= "	 * @return $bigName\n";
+		$class .= "	 */\n";
+		$class .= "	public function innerJoin(string \$joinTable, string \$joinCondition){\n";
+		$class .= "		parent::innerJoin(\$joinTable, \$joinCondition);\n";
+		$class .= "		return \$this;\n";
+		$class .= "	}\n\n";
+
 		$class .= "	/**\n";
 		$class .= "	 * @return $bigName\n";
 		$class .= "	 */\n";
@@ -863,7 +877,7 @@ class ControleModelo
 		$class .= "		parent::notIn(\$column, \$select_not, \$type, \$arg);\n";
 		$class .= "		return \$this;\n";
 		$class .= "	}\n\n";
-		
+
 		$class .= "	/**\n";
 		$class .= "	 * @return $bigName\n";
 		$class .= "	 */\n";
@@ -871,7 +885,7 @@ class ControleModelo
 		$class .= "		parent::whereGroup(\$whereGroup, \$type);\n";
 		$class .= "		return \$this;\n";
 		$class .= "	}\n\n";
-		
+
 		$class .= "	/**\n";
 		$class .= "	 * @return $bigName\n";
 		$class .= "	 */\n";
@@ -879,7 +893,7 @@ class ControleModelo
 		$class .= "		parent::orderBy(\$orderColumn, \$sortType);\n";
 		$class .= "		return \$this;\n";
 		$class .= "	}\n\n";
-		
+
 		$class .= "	/**\n";
 		$class .= "	 * @return $bigName\n";
 		$class .= "	 */\n";
@@ -887,7 +901,7 @@ class ControleModelo
 		$class .= "		parent::limit(\$limit);\n";
 		$class .= "		return \$this;\n";
 		$class .= "	}\n\n";
-		
+
 		$class .= "	/**\n";
 		$class .= "	 * @return $bigName\n";
 		$class .= "	 */\n";
@@ -895,7 +909,7 @@ class ControleModelo
 		$class .= "		parent::setRemoveHour(\$remove_hour);\n";
 		$class .= "		return \$this;\n";
 		$class .= "	}\n\n";
-		
+
 		$class .= "	/**\n";
 		$class .= "	 * @return $bigName\n";
 		$class .= "	 */\n";
@@ -903,7 +917,7 @@ class ControleModelo
 		$class .= "		parent::config(\$config);\n";
 		$class .= "		return \$this;\n";
 		$class .= "	}\n\n";
-		
+
 		$class .= "	/**\n";
 		$class .= "	 * @return $bigName\n";
 		$class .= "	 */\n";
