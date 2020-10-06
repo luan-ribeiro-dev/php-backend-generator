@@ -395,6 +395,8 @@ class ControleModelo
 			$object = array_filter(ControleModelo::getJsonModels(), function ($object) use ($atributo) {
 				return $object['nome'] == $atributo['link']['nome'];
 			});
+			if (count($object) == 0) throw new Exception("arquivo do modelo " . $atributo['link']['tipo'] . " Não foi encontrado");
+			else $object = array_values($object)[0];
 			if ($atributo['link']['tipo'] == "objeto") {
 				$nomeObjeto = Controle::getCapitalizedName(substr($atributo['nome'], 3));
 				$nomeAtributo = Controle::getCapitalizedName($atributo['nome']);
@@ -402,7 +404,7 @@ class ControleModelo
 				$class .= "	 * Conecta ao objeto $nomeObjeto\n";
 				$class .= "	 * @return $nomeObjeto\n";
 				$class .= "	 */\n";
-				$class .= "	public function attach$nomeObjeto(array \$columns = ['" . $atributo['link']['nome_atributo'] . "*'])\n";
+				$class .= "	public function attach$nomeObjeto(array \$columns = ['" . $atributo['link']['nome_atributo'] . ".*'])\n";
 				$class .= "	{\n";
 				$class .= "		if(\$this->get$nomeAtributo() == null) throw new Exception('Não foi possível conectar ao objeto $nomeObjeto pois os atributo " . $atributo['nome'] . " é nulo');\n";
 				$class .= "		\$" . $atributo['link']['nome_atributo'] . " = " . $atributo['link']['nome'] . "::select()\n";
@@ -416,9 +418,8 @@ class ControleModelo
 				//JSON
 				$class .= "	/**\n";
 				$class .= "	 * Conecta ao objeto $nomeObjeto\n";
-				$class .= "	 * @return $nomeObjeto\n";
 				$class .= "	 */\n";
-				$class .= "	public static function attach" . $nomeObjeto . "Json(array &\$$lowerName, array \$columns = ['" . $atributo['link']['nome_atributo'] . "*'])\n";
+				$class .= "	public static function attach" . $nomeObjeto . "Json(array &\$$lowerName, array \$columns = ['" . $atributo['link']['nome_atributo'] . ".*'])\n";
 				$class .= "	{\n";
 				$class .= "		if(!isset(\$" . $lowerName . "['" . $atributo['nome'] . "']) || \$" . $lowerName . "['" . $atributo['nome'] . "'] == null) throw new Exception('Não foi possível conectar ao objeto $nomeObjeto pois os atributo " . $atributo['nome'] . " é nulo');\n";
 				$class .= "		\$" . $atributo['link']['nome_atributo'] . " = " . $atributo['link']['nome'] . "::select()\n";
@@ -433,7 +434,7 @@ class ControleModelo
 				$class .= "	 * Conecta ao objeto $nomeAtributo\n";
 				$class .= "	 * @return " . $atributo['link']['nome'] . "[]\n";
 				$class .= "	 */\n";
-				$class .= "	public function attach$nomeAtributo(array \$columns = ['" . $atributo['link']['nome_atributo'] . "*'])\n";
+				$class .= "	public function attach$nomeAtributo(array \$columns = ['" . $atributo['link']['nome_atributo'] . ".*'])\n";
 				$class .= "	{\n";
 				$class .= "		if(\$this->getId() == null) throw new Exception('Não foi possível conectar ao objeto $nomeAtributo pois os atributo id é nulo');\n";
 				$class .= "		\$" . $atributo['link']['nome_atributo'] . " = " . $atributo['link']['nome'] . "::select()\n";
