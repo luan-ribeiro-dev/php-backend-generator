@@ -273,6 +273,7 @@ class ControleModelo
 			$class .= "		if (\$this->getId() != null) {\n";
 			$class .= "		  \$config = \$this->getConfig();\n";
 			foreach ($objetos_dependentes as $atributo) {
+				$nomeObjeto = Controle::getCapitalizedName(substr($atributo['nome'], 3));
 				if ($atributo['tipo'] != "objeto_assoc" && $atributo['link']['tipo'] == "objeto") {
 					$class .= "\n			if(count(\$this->getChilds()) > 0 && in_array('" . $atributo['link']['nome_atributo'] . "', array_values(\$this->getChilds()))){\n";
 					$class .= "			  if(\$this->get" . Controle::getCapitalizedName($atributo['nome']) . "()!=null){\n";
@@ -284,7 +285,7 @@ class ControleModelo
 					$class .= " 	  			  ->config((isset(\$config['" . $atributo['link']['nome_atributo'] . "'])) ? \$config['" . $atributo['link']['nome_atributo'] . "'] : [])\n";
 					$class .= " 	  			  ->where('id = ?', \$this->get" . Controle::getCapitalizedName($atributo['nome']) . "())\n";
 					$class .= " 	  			  ->get(false, true);\n";
-					$class .= "   				\$this->set" . $atributo['link']['nome'] . "(\$" . $atributo['link']['nome_atributo'] . ");\n";
+					$class .= "   				\$this->set$nomeObjeto(\$" . $atributo['link']['nome_atributo'] . ");\n";
 					$class .= "   			}\n";
 					$class .= "  		}\n";
 				} else if ($atributo['tipo'] == "objeto_assoc" || $atributo['link']['tipo'] == "lista") {
@@ -292,7 +293,7 @@ class ControleModelo
 					$object = array_filter(ControleModelo::getJsonModels(), function ($object) use ($atributo) {
 						return $object['nome'] == $atributo['link']['nome'];
 					});
-					if (count($object) == 0) throw new Exception("arquivo " . $atributo['link']['nome'] . " do modelo " . $atributo['link']['tipo'] . " Não foi encontrado");
+					if (count($object) == 0) throw new Exception("arquivo $nomeObjeto do modelo " . $atributo['link']['tipo'] . " Não foi encontrado");
 					else $object = array_values($object)[0];
 					$class .= "\n			if(count(\$this->getChilds()) > 0 && in_array('" . $atributo['link']['nome_atributo'] . "', array_values(\$this->getChilds()))){\n";
 					$class .= "  			\$childs = (isset(\$config['" . $atributo['link']['nome_atributo'] . "']) && isset(\$config['" . $atributo['link']['nome_atributo'] . "']['childs'])) ? \$config['" . $atributo['link']['nome_atributo'] . "']['childs'] : [];\n";
@@ -418,6 +419,7 @@ class ControleModelo
 				//JSON
 				$class .= "	/**\n";
 				$class .= "	 * Conecta ao objeto $nomeObjeto\n";
+				$class .= "	 * @return array\n";
 				$class .= "	 */\n";
 				$class .= "	public static function attach" . $nomeObjeto . "Json(array &\$$lowerName, array \$columns = ['" . $atributo['link']['nome_atributo'] . ".*'])\n";
 				$class .= "	{\n";
@@ -427,6 +429,7 @@ class ControleModelo
 				$class .= "		  ->where('id = ?', \$" . $lowerName . "['" . $atributo['nome'] . "'])\n";
 				$class .= "		  ->get(true, true);\n";
 				$class .= "		\$" . $lowerName . "['" . $atributo['link']['nome_atributo'] . "'] = \$" . $atributo['link']['nome_atributo'] . ";\n";
+				$class .= "		return \$" . $atributo['link']['nome_atributo'] . ";\n";
 				$class .= "	}\n\n";
 			} else if ($atributo['link']['tipo'] == "lista") {
 				$nomeAtributo = Controle::getCapitalizedName($atributo['nome']);
@@ -560,8 +563,9 @@ class ControleModelo
 		foreach (array_filter($json_object['atributos'], function ($atributo) {
 			return isset($atributo['link']);
 		}) as $atributo) {
+			$nomeObjeto = Controle::getCapitalizedName(substr($atributo['nome'], 3));
 			if ($atributo['tipo'] == "objeto_assoc" || $atributo['link']['tipo'] == "objeto")
-				$class .= "		if(isset(\$json_data['" . $atributo['link']['nome_atributo'] . "'])) $" . $lowerName . "->set" . Controle::getCapitalizedName($atributo['link']['nome']) . "(" . Controle::getCapitalizedName($atributo['link']['nome']) . "::getObject(\$json_data['" . $atributo['link']['nome_atributo'] . "']));\n";
+				$class .= "		if(isset(\$json_data['" . $atributo['link']['nome_atributo'] . "'])) $" . $lowerName . "->set$nomeObjeto(" . Controle::getCapitalizedName($atributo['link']['nome']) . "::getObject(\$json_data['" . $atributo['link']['nome_atributo'] . "']));\n";
 			else if ($atributo['link']['tipo'] == "lista") {
 				$class .= "		if(isset(\$json_data['" . $atributo['nome'] . "'])){\n";
 				$class .= "			$" . $atributo['nome'] . " = [];\n";
@@ -650,17 +654,18 @@ class ControleModelo
 		foreach (array_filter($json_object['atributos'], function ($atributo) {
 			return isset($atributo['link']);
 		}) as $atributo) {
+			$nomeObjeto = Controle::getCapitalizedName(substr($atributo['nome'], 3));
 			if ($atributo['tipo'] == "objeto_assoc" || $atributo['link']['tipo'] == 'objeto') {
 				$class .= "		\$" . $atributo['link']['nome_atributo'] . " = null;\n";
-				$class .= "		if(\$" . $lowerName . "->get" . Controle::getCapitalizedName($atributo['link']['nome']) . "()!=null)\n";
-				$class .= "		\$" . $atributo['link']['nome_atributo'] . " = " . Controle::getCapitalizedName($atributo['link']['nome']) . "::getJson(\$" . $lowerName . "->get" . Controle::getCapitalizedName($atributo['link']['nome']) . "());\n\n";
+				$class .= "		if(\$" . $lowerName . "->get$nomeObjeto()!=null)\n";
+				$class .= "		\$" . $atributo['link']['nome_atributo'] . " = " . Controle::getCapitalizedName($atributo['link']['nome']) . "::getJson(\$" . $lowerName . "->get$nomeObjeto());\n\n";
 			} else if ($atributo['link']['tipo'] == 'lista') {
 				$class .= "		/**\n";
 				$class .= "		 * @var " . Controle::getCapitalizedName($atributo['link']['nome']) . "[] \$" . $atributo['nome'] . "\n";
 				$class .= "		 */\n";
 				$class .= "		\$" . $atributo['nome'] . " = [];\n";
-				$class .= "		if(\$" . $lowerName . "->get" . Controle::getCapitalizedName($atributo['nome']) . "()!=null && count(\$" . $lowerName . "->get" . Controle::getCapitalizedName($atributo['nome']) . "()) > 0)\n";
-				$class .= "		foreach(\$" . $lowerName . "->get" . Controle::getCapitalizedName($atributo['nome']) . "() as \$json) \$" . $atributo['nome'] . "[] = " . Controle::getCapitalizedName($atributo['link']['nome']) . "::getJson(\$json);\n\n";
+				$class .= "		if(\$" . $lowerName . "->get$nomeObjeto()!=null && count(\$" . $lowerName . "->get$nomeObjeto()) > 0)\n";
+				$class .= "		foreach(\$" . $lowerName . "->get$nomeObjeto() as \$json) \$" . $atributo['nome'] . "[] = " . Controle::getCapitalizedName($atributo['link']['nome']) . "::getJson(\$json);\n\n";
 			}
 		}
 		$class .= "		\$json = [\n";
@@ -782,6 +787,7 @@ class ControleModelo
 			}
 
 			if (isset($atributo['link'])) {
+				$nomeObjeto = Controle::getCapitalizedName(substr($atributo['nome'], 3));
 				if ($atributo['tipo'] == "objeto_assoc" || $atributo['link']['tipo'] == "objeto") {
 					$lowerName = $atributo['link']['nome_atributo'];
 					// get
@@ -790,7 +796,7 @@ class ControleModelo
 					$class .= "	 *\n";
 					$class .= "	 * @return " . $atributo['link']['nome'] . "\n";
 					$class .= "	 */\n";
-					$class .= "	public function get" . Controle::getCapitalizedName($atributo['link']['nome']) . "()\n";
+					$class .= "	public function get$nomeObjeto()\n";
 					$class .= "	{\n";
 					$class .= "		return \$this->" . $lowerName . ";\n";
 					$class .= "	}\n\n";
@@ -802,7 +808,7 @@ class ControleModelo
 					$class .= "	 *\n";
 					$class .= "	 * @return self\n";
 					$class .= "	 */\n";
-					$class .= "	public function set" . Controle::getCapitalizedName($atributo['link']['nome']) . "(" . $atributo['link']['nome'] . " \$$lowerName = null)\n";
+					$class .= "	public function set$nomeObjeto(" . $atributo['link']['nome'] . " \$$lowerName = null)\n";
 					$class .= "	{\n";
 					$class .= "		\$this->" . $lowerName . " = $" . $lowerName . ";\n";
 					$class .= "		return \$this;\n";
@@ -814,7 +820,7 @@ class ControleModelo
 					$class .= "	/**\n";
 					$class .= "	 * Retorna o valor to atributo " . $atributo['link']['nome'] . "\n";
 					$class .= "	 *\n";
-					$class .= "	 * @return " . Controle::getCapitalizedName($atributo['link']['nome']) . "[]\n";
+					$class .= "	 * @return ".$nomeObjeto."[]\n";
 					$class .= "	 */\n";
 					$class .= "	public function get" . Controle::getCapitalizedName($atributo['nome']) . "()\n";
 					$class .= "	{\n";
@@ -828,7 +834,7 @@ class ControleModelo
 					$class .= "	 *\n";
 					$class .= "	 * @return self\n";
 					$class .= "	 */\n";
-					$class .= "	public function set" . Controle::getCapitalizedName($atributo['nome']) . "(array \$" . $atributo['nome'] . " = null)\n";
+					$class .= "	public function set$nomeObjeto(array \$" . $atributo['nome'] . " = null)\n";
 					$class .= "	{\n";
 					$class .= "		\$this->" . $atributo['nome'] . " = $" . $atributo['nome'] . ";\n";
 					$class .= "		return \$this;\n";
@@ -882,7 +888,7 @@ class ControleModelo
 		$class .= "	/**\n";
 		$class .= "	 * @return $bigName\n";
 		$class .= "	 */\n";
-		$class .= "	public function whereGroup(\DAO\WhereGroup \$whereGroup, string \$type = null){\n";
+		$class .= "	public function whereGroup(\DAO\WhereGroup \$whereGroup, string \$type = 'and'){\n";
 		$class .= "		parent::whereGroup(\$whereGroup, \$type);\n";
 		$class .= "		return \$this;\n";
 		$class .= "	}\n\n";
